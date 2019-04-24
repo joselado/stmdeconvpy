@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append("../src")
+sys.path.append("../../src")
 
 
 
@@ -11,7 +11,7 @@ import numpy as np
 from stmdeconvpy import deconvolve
 from stmdeconvpy import profiles
 
-xs = np.linspace(-2.0,2.0,100)
+xs = np.linspace(-2.0,2.0,400)
 
 # define filtering signal
 yf = profiles.superconducting(delta=0.5)(xs)
@@ -23,14 +23,14 @@ y0 = deconvolve.normalize(y0) # normalize the profile
 
 
 # define the convolved signal
-yc = np.convolve(y0,yf,mode="same")
+yc = deconvolve.fdconvolution(xs,y0,yf)
 yc = deconvolve.normalize(yc) # normalize the profile
 
 
 import matplotlib.pyplot as plt
 
 # deconvolve the signal
-xn,ydc = deconvolve.deconvolve(xs,yc,xs,yf,len(xs))
+xn,ydc = deconvolve.deconvolve(xs,yc,xs,yf)
 
 
 # now plot the results
