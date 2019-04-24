@@ -81,8 +81,10 @@ def fdconvolution(x,y1,y2,fd=None):
         n = len(x)
         xn,y1n = expand(x,y1)
         xn,y2n = expand(x,y2)
-        out = np.convolve(y1n*fd(xn),y2n,mode="same") 
-        out += - np.convolve(y1n,y2n*fd(xn),mode="same")
+        from .fdconvolution import fdconv
+        out = fdconv(y1n,y2n,fd(xn))
+#        out = np.convolve(y1n*fd(xn),y2n,mode="same") 
+#        out += - np.convolve(y1n,y2n*fd(xn),mode="same")
         return out[n:2*n]
         f1 = interpolate(x,y1) # interpolate
         f2 = interpolate(x,y2) # interpolate

@@ -11,15 +11,15 @@ import numpy as np
 from stmdeconvpy import deconvolve
 from stmdeconvpy import profiles
 
-xs = np.linspace(-2.0,2.0,60)
+xs = np.linspace(-2.0,2.0,30)
 
 # define the superconducting DOS
 ytip = profiles.superconducting(delta=0.5)(xs)
-#ytip = profiles.constant()(xs)
+ytip = profiles.constant()(xs)
 
 # define the real DOS
 ysur = profiles.random_peaks(nmax=3,xmin=-1.0,xmax=1.0,wmin=0.05,wmax=0.2)(xs)
-ysur = profiles.peak()(xs) # return a single peak
+#ysur = profiles.peak()(xs) # return a single peak
 
 
 # define the convolved signal
@@ -31,6 +31,7 @@ import matplotlib.pyplot as plt
 
 # deconvolve the signal
 #xn,ydc = deconvolve.deconvolve_dIdV(xs,yexp,xs,ytip,sol=ysur)
+#xn,ydc = deconvolve.deconvolve_dIdV(xs,yexp,xs,ytip,sol=None)
 xn,ydc = deconvolve.deconvolve_I(xs,yexp,xs,ytip,sol=None)
 (xs,yexp2) = deconvolve.dos2I(xs,ydc,xs,ytip)
 #xn,ydc = deconvolve.deconvolve(xs,yexp,xs,ytip,sol=ysur)
