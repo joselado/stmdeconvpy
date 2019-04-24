@@ -5,7 +5,7 @@ from scipy.interpolate import interp1d
 from scipy.optimize import minimize,anderson
 
 
-def deconvolve(x1,yexp,x2,ytip,n=200,fd=None,sol=None):
+def deconvolve(x1,yexp,x2,ytip,n=80,fd=None,sol=None):
     """
     Deconvolve a signal of the form y1(x)*y2(x-x')dx'
     """
@@ -41,9 +41,9 @@ def deconvolve(x1,yexp,x2,ytip,n=200,fd=None,sol=None):
 #    res = differential_evolution(f,bounds)
 #    res = minimize(f,x0)
     res = minimize(f,x0,method="SLSQP",bounds=bounds,
-            options={"ftol":1e-9,"maxiter":100})
+            options={"ftol":1e-9,"maxiter":1000})
 #    res = minimize(f,res.x,method="Powell")
-    return (x1,interpolate(xs,res.x)(x1))
+    return (x1,normalize(interpolate(xs,res.x)(x1)))
 
 
 
@@ -63,7 +63,7 @@ def deconvolve_exact(x1,yexp,x2,ytip,fd=None,sol=None):
 
 
 
-deconvolve = deconvolve_exact
+#deconvolve = deconvolve_exact
 
 
 

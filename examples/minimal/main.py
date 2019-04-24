@@ -11,7 +11,7 @@ import numpy as np
 from stmdeconvpy import deconvolve
 from stmdeconvpy import profiles
 
-xs = np.linspace(-2.0,2.0,400)
+xs = np.linspace(-2.0,2.0,100)
 
 # define filtering signal
 yf = profiles.superconducting(delta=0.5)(xs)
