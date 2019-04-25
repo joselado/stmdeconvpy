@@ -11,20 +11,17 @@ import numpy as np
 from stmdeconvpy import deconvolve
 from stmdeconvpy import profiles
 
-xs = np.linspace(-2.0,2.0,100)
+xs = np.linspace(-2.0,2.0,200)
 
 # define filtering signal
 yf = profiles.superconducting(delta=0.5)(xs)
-yf = deconvolve.normalize(yf)
 
 # define the real signal
 y0 = profiles.random_peaks(nmax=6,xmin=-2.0,xmax=2.0,wmin=0.05,wmax=0.2)(xs)
-y0 = deconvolve.normalize(y0) # normalize the profile
 
 
 # define the convolved signal
 yc = deconvolve.fdconvolution(xs,y0,yf)
-yc = deconvolve.normalize(yc) # normalize the profile
 
 
 import matplotlib.pyplot as plt

@@ -8,6 +8,10 @@ def normalize(y):
 
 
 
+def noise(y,w=0.0):
+    """Add noise to a signal"""
+    return y + (np.random.random(len(y))-0.5)*0.2*np.max(np.abs(y))
+
 
 
 def constant():
@@ -18,9 +22,9 @@ def constant():
 
 
 
-def superconducting(delta=0.1):
+def superconducting(delta=0.1,T=None):
     """
-    Return a BCS-like superconducting filder
+    Return a BCS-like superconducting filter
     """
     def f(x):
         y = np.zeros(x.shape) # output
@@ -30,8 +34,38 @@ def superconducting(delta=0.1):
             else: 
                 y[i] = 0.0 # zero vector
         y = normalize(y) # normalize the function
+        if T is not None: 
+            y = add_temperature(x,y,T)
+            f = interpolate(x,y)
+            y = (f(x) + f(-x))/2. # symmetrize
         return y
     return f # superconducting filter
+
+
+
+def add_temperature(x,y,T=0.0):
+    """Add temperature to a signal"""
+    fd = dfd_dE(T=T)(x) # get the points
+#    fd = derivative(x,fd) # get the derivative
+    from . import fdconvolution
+#    return fd
+    y = fdconvolution.conv(y,fd)/len(y)
+    return y
+
+
+
+def derivative(x,y):
+    """Compute a derivative"""
+    f = interpolate(x,y) # interpolate
+    from scipy.misc import derivative as der
+    return der(f,x, dx=1e-2) # compute the derivative
+
+
+from scipy.interpolate import interp1d
+def interpolate(x,y,mode="linear"):
+    f = interp1d(x,y,fill_value=(y[0],y[len(y)-1]),
+            bounds_error=False,kind=mode)
+    return f
 
 
 
@@ -88,6 +122,20 @@ def fermi_dirac(T=0.0):
         def f(x): return (1.0-np.sign(x))/2.
     else:
         def f(x): 
-            return 1.0/(1.0 - np.exp(-x/T))
+            return 1.0/(1.0 + np.exp(x/T))
+    return f # return the function
+
+
+
+def dfd_dE(T=0.0):
+    """
+    Fermi Dirac distribution
+    """
+    if T==0.0: raise # zero temperature
+    else:
+        def f(x): 
+            w = np.exp(x/T)
+#            return 1.0/(1.0 + w)
+            return w/T/(1.0 + w)**2
     return f # return the function
 

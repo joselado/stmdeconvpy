@@ -4,33 +4,29 @@ sys.path.append("../../src")
 import numpy as np
 from stmdeconvpy import deconvolve
 from stmdeconvpy import profiles
-V = np.linspace(-4.0,4.0,200) # energies
+from stmdeconvpy import dataset
+
+
+# get the data
+(V,dIdV_exp) = dataset.opencur("data.cur") # get the data
+dIdV_exp = profiles.normalize(dIdV_exp)
+I_exp = deconvolve.dIdV2I(V,dIdV_exp) # get the current
+
+#V,I_exp = deconvolve.expand_I(V,I_exp)
+V,dIdV_exp = deconvolve.I2dIdV(V,I_exp)
+
 
 # define the superconducting DOS
-dos_tip = profiles.superconducting(delta=0.5,T=0.1)(V) # superconducting Tip
+dos_tip = profiles.superconducting(delta=0.12,T=0.02)(V) # superconducting Tip
+#np.savetxt("DOS.OUT",np.array([V,dos_tip]).T) ;  exit()
 #dos_tip = profiles.constant()(V) # normal Tip
-np.savetxt("TIP.OUT",np.array([V,dos_tip]).T)# ; exit()
 
 
-
-# define the real DOS
-dos_sur = profiles.random_peaks(nmin=3,nmax=3,xmin=-1.0,xmax=1.0,wmin=0.05,wmax=0.2)(V)
-#dos_sur = profiles.peak(w=0.1)(V)
-# and its associated signals (for testing purpose)
-(V,I_exp) = deconvolve.dos2I(V,dos_sur,V,dos_tip)
-# add some noise to the signal
-#I_exp += np.random.random(len(I_exp))*0.2*np.max(np.abs(I_exp))
-
-# and compute the experimental dIdV
-(V,dIdV_exp) = deconvolve.I2dIdV(V,I_exp)
 
 
 #####################################################################
 ############# You do not need to change anything else ###############
 #####################################################################
-
-
-
 
 
 
@@ -85,7 +81,7 @@ plt.legend()
 
 # plot the DOS of the surface
 plt.subplot(222)
-plt.plot(V,dos_sur,label="Surface DOS",c="red")
+#plt.plot(V,dos_sur,label="Surface DOS",c="red")
 plt.scatter(xn,dos_sur_dc,label="Deconvolved surface DOS",c="blue")
 plt.xlim([np.min(V),np.max(V)])
 plt.xlabel("Energy [a.u.]")
