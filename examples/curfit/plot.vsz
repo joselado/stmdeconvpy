@@ -1,5 +1,5 @@
 # Veusz saved document (version 3.0.1)
-# Saved at 2019-04-25T16:20:29.989799
+# Saved at 2019-04-25T16:44:31.241163
 
 AddImportPath(u'/home/jose/Documents/programs/stmdeconvpy/examples/curfit')
 ImportFile(u'DECONVOLUTED_DOS.OUT', u'edos ydos', ignoretext=True, linked=True)
@@ -82,7 +82,7 @@ Add('axis', name='y', autoadd=False)
 To('y')
 Set('label', u'dI/dV [arb. units]')
 Set('min', 0.0)
-Set('max', 0.648)
+Set('max', 0.723)
 Set('direction', 'vertical')
 Set('Label/size', u'24pt')
 Set('TickLabels/size', u'26pt')
