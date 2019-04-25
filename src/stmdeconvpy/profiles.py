@@ -34,7 +34,7 @@ def superconducting(delta=0.1,T=None):
             else: 
                 y[i] = 0.0 # zero vector
         y = normalize(y) # normalize the function
-        if T is not None: 
+        if T is not None and T!=0.0: 
             y = add_temperature(x,y,T)
             f = interpolate(x,y)
             y = (f(x) + f(-x))/2. # symmetrize
