@@ -15,7 +15,7 @@ np.savetxt("TIP.OUT",np.array([V,dos_tip]).T)# ; exit()
 
 # define the real DOS
 dos_sur = profiles.random_peaks(nmin=3,nmax=3,xmin=-1.0,xmax=1.0,wmin=0.05,wmax=0.2)(V)
-#dos_sur = profiles.peak(w=0.1)(V)
+dos_sur = profiles.peak(w=0.1)(V)
 # and its associated signals (for testing purpose)
 (V,I_exp) = deconvolve.dos2I(V,dos_sur,V,dos_tip)
 # add some noise to the signal

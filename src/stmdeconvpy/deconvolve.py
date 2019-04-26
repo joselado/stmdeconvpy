@@ -31,7 +31,7 @@ def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,
     for ni in ns:
       (x,sol,error) = single_deconvolve(x1,yexp,x2,ytip,n=ni,sol=sol,
               return_error=True,**kwargs)
-      if sgfilter: sol = smoothen(sol)
+#      if sgfilter: sol = smoothen(sol)
     print("Error in this minimization",error)
     if return_error: return x,sol,error
     else: return x,sol
@@ -54,13 +54,18 @@ def single_deconvolve(x1,yexp,x2,ytip,n=41,fd=None,sol=None,
     """
     f1 = interpolate(x1,yexp)
     f2 = interpolate(x2,ytip)
-    xmin = np.min([np.min(x1),np.min(x2)])
-    xmax = np.max([np.max(x1),np.max(x2)])
+#    xmin = np.min([np.min(x1),np.min(x2)])
+#    xmax = np.max([np.max(x1),np.max(x2)])
+    xmax =  np.max(np.abs([np.max(x1),np.max(x2)]))
+    xmin = -xmax # same
+    # create the points centered at zero
     xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
     yexpn = f1(xs) # interpolated data
     ytipn = f2(xs) # interpolated data
+    if fd is not None: fdx = fd(xs) # evaluate the function
+    else: fdx = None
     def fdiff(y): # function with the difference
-        out = fdconvolution(xs,y,ytipn,fd=fd) # special convolution
+        out = fdconvolution(xs,y,ytipn,fd=fdx) # special convolution
         diff = out - yexpn # difference
 #        print(np.max(np.abs(diff)))
         return diff
@@ -118,7 +123,9 @@ def fdconvolution(x,y1,y2,fd=None):
 #        xn,y2n = expand(x,y2)
         from .fdconvolution import fdconv
 #        out = fdconv(y1n,y2n,fd(xn))
-        return fdconv(y1,y2,fd(x))/len(x)
+        if callable(fd): fdx = fd(x) # call function
+        else: fdx = fd # assume it is an array
+        return fdconv(y1,y2,fdx)/len(x)
 #        out = np.convolve(y1n*fd(xn),y2n,mode="same") 
 #        out += - np.convolve(y1n,y2n*fd(xn),mode="same")
 #        return out[n:2*n]
@@ -163,10 +170,12 @@ def convolve_dos(x1,y1,x2,y2,fd=None,n=None,T=0.0):
         fd = profiles.fermi_dirac(T=T) # Fermi Dirac distribution
     f1 = interpolate(x1,y1)
     f2 = interpolate(x2,y2)
-    xmin = np.min([np.min(x1),np.min(x2)])
-    xmax = np.max([np.max(x1),np.max(x2)])
+    xmax =  np.max(np.abs([np.max(x1),np.max(x2)]))
+    xmin = -xmax # same
+#    xmin = np.min([np.min(x1),np.min(x2)])
+#    xmax = np.max([np.max(x1),np.max(x2)])
     if n is None: n = len(x1) # as many as x1
-    xs = np.linspace(xmin,xmax,n) # as many points
+    xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
     yc = fdconvolution(xs,f1(xs),f2(xs),fd=fd)
     yo = interpolate(xs,yc)(x1)
     return (x1,yo) # return
