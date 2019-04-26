@@ -5,19 +5,31 @@ from scipy.interpolate import interp1d
 from scipy.optimize import minimize,anderson
 
 
-def best_deconvolve(x1,yexp,x2,ytip,ntries=4,**kwargs):
+def best_deconvolve(x1,yexp,x2,ytip,ntries=4,return_error=False,
+        **kwargs):
     """Return the best deconvolution"""
-    def f():
-        return deconvolve(x1,yexp,x2,ytip,return_error=True,**kwargs)
-    (x0,y0,e0) = f() # do it once
+    def f(sol):
+        return deconvolve(x1,yexp,x2,ytip,sol=sol,return_error=True,**kwargs)
+    # random initial guesses
+    sols = [np.random.random(x1.shape) for i in range(ntries)]
+    from . import parallel
+    parallel.cores = min([parallel.maxcpu,ntries]) # number of cores
+    # compute everything
+    outs = parallel.pcall(f,sols)
+    (x0,y0,e0) = outs[0] # do it once
     for i in range(ntries-1): # loop
-        (x,y,e) = f() # perform the minimization
+        (x,y,e) = outs[i] # perform the minimization
         if e<e0:
             e0 = e 
             x0 = x
             y0 = y
+    ys = np.array([outs[i][1] for i in range(ntries)]) # get the fits
+    es = np.array([outs[i][2] for i in range(ntries)]) # get the errors
+    dy = np.sqrt(np.var(ys,axis=0)) # compute variance
+    y0 = np.average(ys,axis=0,weights=1./es) # compute weighted average
     print("Best deconvolution out of",ntries,"has error",e0)
-    return (x0,y0)
+    if return_error: return (x0,y0,dy)
+    else: return (x0,y0)
 
 
 
@@ -31,7 +43,7 @@ def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,
     for ni in ns:
       (x,sol,error) = single_deconvolve(x1,yexp,x2,ytip,n=ni,sol=sol,
               return_error=True,**kwargs)
-#      if sgfilter: sol = smoothen(sol)
+      if sgfilter: sol = smoothen(sol) # smoothen the solution
     print("Error in this minimization",error)
     if return_error: return x,sol,error
     else: return x,sol
@@ -71,10 +83,14 @@ def single_deconvolve(x1,yexp,x2,ytip,n=41,fd=None,sol=None,
         return diff
     def f(y):
         dd = fdiff(y)
-        error = np.mean(np.abs(dd)) # compute the error
+        # compute the error
+        error = np.abs(dd) #+ np.mean(np.abs(np.diff(dd))) 
+#        dmax = np.max(dd) # maximum error
+        error = np.sqrt(np.mean(error**2)) # define error
+        error = np.mean(np.abs(dd)) #+ np.mean(np.abs(np.diff(dd))) 
         if print_error: print(error)
         return error
-    bounds = [(0,1) for ix in xs]
+    bounds = [(0,10) for ix in xs]
     if sol is None: x0 = np.random.random(len(xs))
     #derivative(xs,yexpn) # default try
     else: x0 = interpolate(x1,sol)(xs)

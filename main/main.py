@@ -15,10 +15,11 @@ parser.add_argument("--input",default="data.cur",help='Input file with the data'
 parser.add_argument("--output",default="DECONVOLUTED_DOS.OUT",help='Output file with the deconvolved DOS')
 parser.add_argument("--tip_output",default="TIP_DOS.OUT",help='Output file with the DOS of the tip (including temperature)')
 parser.add_argument("--dIdV_output",default="dIdV_OUTPUT.OUT",help='Output file with the resulting dIdV obtained assuming the deconvoluted DOS')
-parser.add_argument("--dIdV_input",default="dIdV_INPUT.OUT",help='Input file with the dIdV sfter it was preprocessed')
+parser.add_argument("--dIdV_input",default="dIdV_INPUT.OUT",help='Input file with the dIdV after it was preprocessed')
 parser.add_argument("--delta",default=0.12,help='Superconducting gap of the tip')
 parser.add_argument("--T",default=0.02,help='Temperature of the tip')
 parser.add_argument("--ntries",default=4,help='Take the best out of ntries minimizations')
+parser.add_argument("--maxn",default=100,help='Maximum number of grid points used in the deconvolution, increase it for higher accuracy')
 args = parser.parse_args()
 
 print("Reading data from ",args.input)
@@ -63,16 +64,17 @@ np.savetxt(args.tip_output,np.array([V,dos_tip]).T)
 ############# You do not need to change anything else ###############
 #####################################################################
 
-
+maxn = int(args.maxn) # points in the deconvolution
 
 import matplotlib.pyplot as plt
 
 # deconvolve the signal
-xn,dos_sur_dc = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,sol=None,
+xn,dos_sur_dc,error = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,
+        return_error = True,n=maxn,
         ntries=int(args.ntries),print_error=False,T=T)
 
 # write the surface DOS
-np.savetxt(args.output,np.array([xn,dos_sur_dc]).T)
+np.savetxt(args.output,np.array([xn,dos_sur_dc,error]).T)
 print("Surface DOS written to ",args.output)
 
 (V,I_exp2) = deconvolve.dos2I(V,dos_sur_dc,V,dos_tip,T=T)

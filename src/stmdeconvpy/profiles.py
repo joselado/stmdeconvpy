@@ -62,7 +62,7 @@ def derivative(x,y):
 
 
 from scipy.interpolate import interp1d
-def interpolate(x,y,mode="linear"):
+def interpolate(x,y,mode="cubic"):
     f = interp1d(x,y,fill_value=(y[0],y[len(y)-1]),
             bounds_error=False,kind=mode)
     return f
