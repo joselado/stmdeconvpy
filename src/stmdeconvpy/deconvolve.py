@@ -59,8 +59,9 @@ def smoothen(sol):
 
 
 
-def single_deconvolve(x1,yexp,x2,ytip,n=41,fd=None,sol=None,
-        return_error=True,print_error=True):
+def single_deconvolve(x1,yexp,x2,ytip,n=41,sol=None,
+        return_error=True,print_error=True,
+        fd1=None,fd2=None,**kwargs):
     """
     Deconvolve a signal of the form y1(x)*y2(x-x')dx'
     """
@@ -74,10 +75,11 @@ def single_deconvolve(x1,yexp,x2,ytip,n=41,fd=None,sol=None,
     xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
     yexpn = f1(xs) # interpolated data
     ytipn = f2(xs) # interpolated data
-    if fd is not None: fdx = fd(xs) # evaluate the function
+    if fd1 is not None: fd1x = fd1(xs) # evaluate the function
+    if fd2 is not None: fd2x = fd2(xs) # evaluate the function
     else: fdx = None
     def fdiff(y): # function with the difference
-        out = fdconvolution(xs,y,ytipn,fd=fdx) # special convolution
+        out = fdconvolution(xs,y,ytipn,fd1=fd1x,fd2=fd2x) # special convolution
         diff = out - yexpn # difference
 #        print(np.max(np.abs(diff)))
         return diff
@@ -103,7 +105,8 @@ def single_deconvolve(x1,yexp,x2,ytip,n=41,fd=None,sol=None,
 
 
 
-def deconvolve_exact(x1,yexp,x2,ytip,fd=None,sol=None):
+def deconvolve_exact(x1,yexp,x2,ytip,fd1=None,fd2=None,
+        sol=None):
     """Use the deconvolution in the cleanest way"""
     bounds = [(0,1) for ix in x1]
     def f(y):
@@ -123,9 +126,9 @@ def deconvolve_exact(x1,yexp,x2,ytip,fd=None,sol=None):
 
 
 
-def fdconvolution(x,y1,y2,fd=None):
+def fdconvolution(x,y1,y2,fd1=None,fd2=None):
     """Fermi Dirac convolution"""
-    if fd is None: # no function given
+    if fd1 is None and fd2 is None: # no function given
         return np.convolve(y1,y2,mode="same")/len(y1)
         f1 = interpolate(x,y1) # interpolate
         f2 = interpolate(x,y2) # interpolate
@@ -139,9 +142,11 @@ def fdconvolution(x,y1,y2,fd=None):
 #        xn,y2n = expand(x,y2)
         from .fdconvolution import fdconv
 #        out = fdconv(y1n,y2n,fd(xn))
-        if callable(fd): fdx = fd(x) # call function
-        else: fdx = fd # assume it is an array
-        return fdconv(y1,y2,fdx)/len(x)
+        if callable(fd1): fd1x = fd1(x) # call function
+        else: fd1x = fd1 # assume it is an array
+        if callable(fd2): fd2x = fd2(x) # call function
+        else: fd2x = fd2 # assume it is an array
+        return fdconv(y1,y2,fd1x,fd2x)/len(x)
 #        out = np.convolve(y1n*fd(xn),y2n,mode="same") 
 #        out += - np.convolve(y1n,y2n*fd(xn),mode="same")
 #        return out[n:2*n]
@@ -178,12 +183,16 @@ def only_positive_derivative(x,y):
 
 
 
-def convolve_dos(x1,y1,x2,y2,fd=None,n=None,T=0.0):
+def convolve_dos(x1,y1,x2,y2,n=None,Ttip=0.0,Tsur=0.0,T=None):
     """
     Convolve two signals
     """
-    if fd is None: # no Fermi Dirac distribution given
-        fd = profiles.fermi_dirac(T=T) # Fermi Dirac distribution
+    if T is not None:
+        fd1 = profiles.fermi_dirac(T=T) # Fermi Dirac distribution
+        fd2 = profiles.fermi_dirac(T=T) # Fermi Dirac distribution
+    else:
+        fd1 = profiles.fermi_dirac(T=Ttip) # Fermi Dirac distribution
+        fd2 = profiles.fermi_dirac(T=Tsur) # Fermi Dirac distribution
     f1 = interpolate(x1,y1)
     f2 = interpolate(x2,y2)
     xmax =  np.max(np.abs([np.max(x1),np.max(x2)]))
@@ -192,7 +201,7 @@ def convolve_dos(x1,y1,x2,y2,fd=None,n=None,T=0.0):
 #    xmax = np.max([np.max(x1),np.max(x2)])
     if n is None: n = len(x1) # as many as x1
     xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
-    yc = fdconvolution(xs,f1(xs),f2(xs),fd=fd)
+    yc = fdconvolution(xs,f1(xs),f2(xs),fd1=fd1(xs),fd2=fd2(xs))
     yo = interpolate(xs,yc)(x1)
     return (x1,yo) # return
 
@@ -227,13 +236,17 @@ def dos2dIdV(x1,y1,x2,y2,**kwargs):
 
 
 
-def deconvolve_I(x1,y1,x2,y2,fd=None,T=0.0,**kwargs):
+def deconvolve_I(x1,y1,x2,y2,T=None,Ttip=0.0,Tsur=0.0,**kwargs):
     """
     Deconvolve the I VS V signal
     """
-    if fd is None: # no Fermi Dirac distribution given
-        fd = profiles.fermi_dirac(T=T) # Fermi Dirac distribution
-    return best_deconvolve(x1,y1,x2,y2,fd=fd,**kwargs)
+    if T is not None: # one temperature
+      fd1 = profiles.fermi_dirac(T=T) # Fermi Dirac distribution
+      fd2 = profiles.fermi_dirac(T=T) # Fermi Dirac distribution
+    else: # two temperatures
+      fd1 = profiles.fermi_dirac(T=Ttip) # Fermi Dirac distribution
+      fd2 = profiles.fermi_dirac(T=Tsur) # Fermi Dirac distribution
+    return best_deconvolve(x1,y1,x2,y2,fd1=fd1,fd2=fd2,**kwargs)
 
 
 

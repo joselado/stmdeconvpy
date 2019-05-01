@@ -21,6 +21,22 @@ def constant():
     return f
 
 
+def dynes_superconductor(delta=0.1,gamma=0.0):
+    """Return the profile of a Dynes superconductor"""
+    def f(x):
+        d = (x+1j*gamma)**2 - delta**2 # denominator
+        phi = np.angle(d) # compute the complex phase
+        den2 = np.sqrt(np.abs(d))*np.exp(1j*phi/2) # denominator
+        den = den2*0. # initialize
+        for i in range(len(den)):
+            if den2[i].imag>0.0:  den[i] = den2[i] # positive
+            else: den[i] = -den2[i]
+        num = x + 1j*gamma # compute numerator
+        return (num/den).real # return profile
+    return f
+
+
+
 
 def superconducting(delta=0.1,T=None):
     """

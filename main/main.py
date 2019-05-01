@@ -17,9 +17,11 @@ parser.add_argument("--tip_output",default="TIP_DOS.OUT",help='Output file with 
 parser.add_argument("--dIdV_output",default="dIdV_OUTPUT.OUT",help='Output file with the resulting dIdV obtained assuming the deconvoluted DOS')
 parser.add_argument("--dIdV_input",default="dIdV_INPUT.OUT",help='Input file with the dIdV after it was preprocessed')
 parser.add_argument("--delta",default=0.12,help='Superconducting gap of the tip')
-parser.add_argument("--T",default=0.02,help='Temperature of the tip')
+parser.add_argument("--Ttip",default=0.02,help='Temperature of the tip')
+parser.add_argument("--Tsur",default=0.02,help='Temperature of the surface')
 parser.add_argument("--ntries",default=4,help='Take the best out of ntries minimizations')
 parser.add_argument("--maxn",default=100,help='Maximum number of grid points used in the deconvolution, increase it for higher accuracy')
+parser.add_argument("--gamma",default=0.01,help='Gamma smearing of the Dynes superconducting DOS')
 args = parser.parse_args()
 
 print("Reading data from ",args.input)
@@ -45,11 +47,11 @@ np.savetxt(args.dIdV_input,np.array([V,dIdV_exp]).T)
 
 
 
-T = float(args.T) # get the temperature
 delta = float(args.delta) # get the superconducting gap
+gamma = float(args.gamma) # get the superconducting gamma
 
 # define the superconducting DOS
-dos_tip = profiles.superconducting(delta=delta,T=T)(V) # superconducting Tip
+dos_tip = profiles.dynes_superconductor(delta=delta,gamma=gamma)(V) # superconducting Tip
 
 
 print("Tip DOS written to ",args.tip_output)
@@ -68,17 +70,23 @@ maxn = int(args.maxn) # points in the deconvolution
 
 import matplotlib.pyplot as plt
 
+Ttip = float(args.Ttip) # temperature of the tip
+Tsur = float(args.Tsur) # temperature of the tip
+
 # deconvolve the signal
 xn,dos_sur_dc,error = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,
         return_error = True,n=maxn,
-        ntries=int(args.ntries),print_error=False,T=T)
+        ntries=int(args.ntries),print_error=False,Ttip=Ttip,
+        Tsur=Tsur)
 
 # write the surface DOS
 np.savetxt(args.output,np.array([xn,dos_sur_dc,error]).T)
 print("Surface DOS written to ",args.output)
 
-(V,I_exp2) = deconvolve.dos2I(V,dos_sur_dc,V,dos_tip,T=T)
-(V,dIdV_exp2) = deconvolve.dos2dIdV(V,dos_sur_dc,V,dos_tip,T=T)
+(V,I_exp2) = deconvolve.dos2I(V,dos_sur_dc,V,dos_tip,
+        Ttip=Ttip,Tsur=Tsur)
+(V,dIdV_exp2) = deconvolve.dos2dIdV(V,dos_sur_dc,V,dos_tip,
+        Ttip=Ttip,Tsur=Tsur)
 print("dIdV with deconvoluted DOS written to ",args.dIdV_output)
 np.savetxt(args.dIdV_output,np.array([V,dIdV_exp2]).T)
 #xn,dos_sur_dc = deconvolve.deconvolve(V,I_exp,V,dos_tip,sol=dos_sur)
