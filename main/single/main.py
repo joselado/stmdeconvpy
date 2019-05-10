@@ -2,7 +2,7 @@
 import os
 path = os.path.dirname(os.path.realpath(__file__))
 import sys
-sys.path.append(path+"/../src") # add the library
+sys.path.append(path+"/../../src") # add the library
 
 import numpy as np
 from stmdeconvpy import deconvolve
@@ -22,14 +22,17 @@ parser.add_argument("--Tsur",default=0.02,help='Temperature of the surface')
 parser.add_argument("--ntries",default=4,help='Take the best out of ntries minimizations')
 parser.add_argument("--maxn",default=100,help='Maximum number of grid points used in the deconvolution, increase it for higher accuracy')
 parser.add_argument("--gamma",default=0.01,help='Gamma smearing of the Dynes superconducting DOS')
+parser.add_argument("--show",default="true",help='Show the result')
+parser.add_argument("--TinKVinmeV",default="false",help='Temperature in Kelvin, energies in meV')
 args = parser.parse_args()
 
 print("Reading data from ",args.input)
 print("The script will perform ",args.ntries,"minimizations")
 
 # get the data
-(V,dIdV_exp) = dataset.opencur(args.input) # get the data
-dIdV_exp = profiles.normalize(dIdV_exp)
+#(V,dIdV_exp) = dataset.opencur(args.input) # get the data
+(V,dIdV_exp) = dataset.openfile(args.input) # get the data
+#dIdV_exp = profiles.normalize(dIdV_exp)
 
 
 
@@ -73,6 +76,13 @@ import matplotlib.pyplot as plt
 Ttip = float(args.Ttip) # temperature of the tip
 Tsur = float(args.Tsur) # temperature of the tip
 
+if args.TinKVinmeV=="true":
+    print("Assuming temeperatures in K and energies in meV")
+    k2mev = 8.6217*1e-2
+    Ttip = Ttip*k2mev
+    Tsur = Tsur*k2mev
+
+
 # deconvolve the signal
 xn,dos_sur_dc,error = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,
         return_error = True,n=maxn,
@@ -80,6 +90,7 @@ xn,dos_sur_dc,error = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,
         Tsur=Tsur)
 
 # write the surface DOS
+#xn,dos_sur_dc,error = dataset.crop_uncertainty(xn,dos_sur_dc,error)
 np.savetxt(args.output,np.array([xn,dos_sur_dc,error]).T)
 print("Surface DOS written to ",args.output)
 
@@ -91,6 +102,8 @@ print("dIdV with deconvoluted DOS written to ",args.dIdV_output)
 np.savetxt(args.dIdV_output,np.array([V,dIdV_exp2]).T)
 #xn,dos_sur_dc = deconvolve.deconvolve(V,I_exp,V,dos_tip,sol=dos_sur)
 
+
+if args.show!="true": exit() # return
 
 # now plot the results
 import matplotlib

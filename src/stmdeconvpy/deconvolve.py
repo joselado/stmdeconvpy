@@ -104,6 +104,10 @@ def single_deconvolve(x1,yexp,x2,ytip,n=41,sol=None,
     else:  return (x1,yout)
 
 
+# this is a failed attempt to use linalg to solve the problem
+#from .deconvolvelstsq import single_deconvolve
+
+
 
 def deconvolve_exact(x1,yexp,x2,ytip,fd1=None,fd2=None,
         sol=None):
@@ -137,28 +141,12 @@ def fdconvolution(x,y1,y2,fd1=None,fd2=None):
         y3 = np.convolve(f1(xs),f2(xs),mode="same")
         return interpolate(xs,y3)(x)
     else: # assume that there is a Fermi Dirac distribution as input 
-#        n = len(x)
-#        xn,y1n = expand(x,y1)
-#        xn,y2n = expand(x,y2)
         from .fdconvolution import fdconv
-#        out = fdconv(y1n,y2n,fd(xn))
         if callable(fd1): fd1x = fd1(x) # call function
         else: fd1x = fd1 # assume it is an array
         if callable(fd2): fd2x = fd2(x) # call function
         else: fd2x = fd2 # assume it is an array
         return fdconv(y1,y2,fd1x,fd2x)/len(x)
-#        out = np.convolve(y1n*fd(xn),y2n,mode="same") 
-#        out += - np.convolve(y1n,y2n*fd(xn),mode="same")
-#        return out[n:2*n]
-#        f1 = interpolate(x,y1) # interpolate
-#        f2 = interpolate(x,y2) # interpolate
-#        dx = max(x) - min(x)
-#        xs = np.linspace(min(x)-dx,max(x)+dx,len(x)*3) # as many points
-#        out = np.convolve(f1(xs)*fd(xs),f2(xs),mode="same") # first term
-#        out += -np.convolve(f1(xs),f2(xs)*fd(xs),mode="same") # second term
-#        out = interpolate(xs,out,mode="linear")(x)
-#        out = only_positive_derivative(x,out) # retain only positive derivative
-#        return out 
 
 
 
