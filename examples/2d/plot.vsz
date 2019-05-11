@@ -1,5 +1,5 @@
 # Veusz saved document (version 3.0.1)
-# Saved at 2019-05-10T11:09:15.103053
+# Saved at 2019-05-11T12:32:33.050642
 
 AddImportPath(u'/home/jose/Documents/programs/stmdeconvpy/examples/2d')
 ImportFile(u'DECONVOLUTED_DOS_MAP.OUT', u'x y z d', ignoretext=True, linked=True)
@@ -146,7 +146,7 @@ Set('key', u'')
 Set('xAxis', u'x')
 Set('yAxis', u'y')
 Set('Color/points', u'z/max(z)')
-Set('Color/max', 0.01)
+Set('Color/max', 0.9)
 Set('Color/scaling', u'squared')
 Set('PlotLine/color', u'foreground')
 Set('PlotLine/width', u'6pt')

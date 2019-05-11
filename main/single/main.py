@@ -23,11 +23,20 @@ parser.add_argument("--ntries",default=4,help='Take the best out of ntries minim
 parser.add_argument("--maxn",default=100,help='Maximum number of grid points used in the deconvolution, increase it for higher accuracy')
 parser.add_argument("--gamma",default=0.01,help='Gamma smearing of the Dynes superconducting DOS')
 parser.add_argument("--show",default="true",help='Show the result')
+parser.add_argument("--mode",default="minimize",help='Mode of the calculation, minimize is the feault, whereas algebra is faster')
 parser.add_argument("--TinKVinmeV",default="false",help='Temperature in Kelvin, energies in meV')
 args = parser.parse_args()
 
+#### preprocessing of the arguments
+if args.mode=="algebra":
+    print("Calculation mode is algebra, taking a single try")
+    args.ntries = 1
+
+
+
 print("Reading data from ",args.input)
 print("The script will perform ",args.ntries,"minimizations")
+
 
 # get the data
 #(V,dIdV_exp) = dataset.opencur(args.input) # get the data
@@ -87,7 +96,7 @@ if args.TinKVinmeV=="true":
 xn,dos_sur_dc,error = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,
         return_error = True,n=maxn,
         ntries=int(args.ntries),print_error=False,Ttip=Ttip,
-        Tsur=Tsur)
+        Tsur=Tsur,mode=args.mode)
 
 # write the surface DOS
 #xn,dos_sur_dc,error = dataset.crop_uncertainty(xn,dos_sur_dc,error)

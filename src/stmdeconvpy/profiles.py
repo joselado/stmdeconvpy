@@ -78,9 +78,15 @@ def derivative(x,y):
 
 
 from scipy.interpolate import interp1d
-def interpolate(x,y,mode="cubic"):
-    f = interp1d(x,y,fill_value=(y[0],y[len(y)-1]),
+def interpolate(x,y,mode="cubic",positive=False):
+    if positive: # enforce the function to be positive
+        y2 = np.abs(y) # enforce the function to be positive
+    else: y2 = y
+    f = interp1d(x,y2,fill_value=(y[0],y[len(y)-1]),
             bounds_error=False,kind=mode)
+    if positive: # enforce the function to be positive
+        f2 = lambda x: np.abs(f(x))
+    else: f2 = f
     return f
 
 

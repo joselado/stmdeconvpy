@@ -37,6 +37,9 @@ x = []
 y = []
 z = []
 d = []
+os.system("mkdir stmdeconvtmp")
+print("Creating folder stmdeconvtmp, it will be cleaned at the end")
+os.chdir("stmdeconvtmp") # go to the folder
 for i in range(len(m)):
     mi = m[i]
     np.savetxt("temp.txt",np.array([mi[0],mi[2]]).T)
@@ -46,6 +49,10 @@ for i in range(len(m)):
     y = np.concatenate([y,mi[1]])
     z = np.concatenate([z,out[1]])
     d = np.concatenate([d,out[2]])
-    np.savetxt("DECONVOLUTED_DOS_MAP.OUT",np.array([x,y,z,d]).T)
+    np.savetxt("../DECONVOLUTED_DOS_MAP.OUT",np.array([x,y,z,d]).T)
     print("Saved data in DECONVOLUTED_DOS_MAP.OUT")
+os.system("cp TIP_DOS.OUT ../") # copy to the previous folder
+os.chdir("..")
+os.system("rm -rf stmdeconvtmp") # cleaning temporal folder
+print("Deconvolution finished")
 

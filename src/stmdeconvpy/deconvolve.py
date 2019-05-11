@@ -34,12 +34,17 @@ def best_deconvolve(x1,yexp,x2,ytip,ntries=4,return_error=False,
 
 
 def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,
-        sol=None,sgfilter=True,n=100,**kwargs):
+        sol=None,sgfilter=True,n=100,mode="minimize",**kwargs):
     """Perform a deconvolution of a signal"""
     if ns is None:
 #        ns = [21,41,91,131]
         ni = 2*(n//2) +1 # odd number
         ns = [41,ni] # compute twice
+    if mode=="minimize":
+      from .deconvmode import single_deconvolve_minimize as single_deconvolve
+    elif mode=="algebra":
+      from .deconvmode import single_deconvolve_algebra as single_deconvolve
+    else: raise
     for ni in ns:
       (x,sol,error) = single_deconvolve(x1,yexp,x2,ytip,n=ni,sol=sol,
               return_error=True,**kwargs)
@@ -58,54 +63,7 @@ def smoothen(sol):
 
 
 
-
-def single_deconvolve(x1,yexp,x2,ytip,n=41,sol=None,
-        return_error=True,print_error=True,
-        fd1=None,fd2=None,**kwargs):
-    """
-    Deconvolve a signal of the form y1(x)*y2(x-x')dx'
-    """
-    f1 = interpolate(x1,yexp)
-    f2 = interpolate(x2,ytip)
-#    xmin = np.min([np.min(x1),np.min(x2)])
-#    xmax = np.max([np.max(x1),np.max(x2)])
-    xmax =  np.max(np.abs([np.max(x1),np.max(x2)]))
-    xmin = -xmax # same
-    # create the points centered at zero
-    xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
-    yexpn = f1(xs) # interpolated data
-    ytipn = f2(xs) # interpolated data
-    if fd1 is not None: fd1x = fd1(xs) # evaluate the function
-    if fd2 is not None: fd2x = fd2(xs) # evaluate the function
-    else: fdx = None
-    def fdiff(y): # function with the difference
-        out = fdconvolution(xs,y,ytipn,fd1=fd1x,fd2=fd2x) # special convolution
-        diff = out - yexpn # difference
-#        print(np.max(np.abs(diff)))
-        return diff
-    def f(y):
-        dd = fdiff(y)
-        # compute the error
-        error = np.abs(dd) #+ np.mean(np.abs(np.diff(dd))) 
-#        dmax = np.max(dd) # maximum error
-        error = np.sqrt(np.mean(error**2)) # define error
-        error = np.mean(np.abs(dd)) #+ np.mean(np.abs(np.diff(dd))) 
-        if print_error: print(error)
-        return error
-    bounds = [(0,10) for ix in xs]
-    if sol is None: x0 = np.random.random(len(xs))
-    #derivative(xs,yexpn) # default try
-    else: x0 = interpolate(x1,sol)(xs)
-    res = minimize(f,x0,method="SLSQP",bounds=bounds,
-            options={"ftol":1e-10,"maxiter":10000})
-#    res = minimize(f,res.x,method="Powell")
-    yout = interpolate(xs,res.x)(x1)
-    if return_error:  return (x1,yout,f(res.x))
-    else:  return (x1,yout)
-
-
 # this is a failed attempt to use linalg to solve the problem
-#from .deconvolvelstsq import single_deconvolve
 
 
 
@@ -127,27 +85,6 @@ def deconvolve_exact(x1,yexp,x2,ytip,fd1=None,fd2=None,
 
 
 #deconvolve = deconvolve_exact
-
-
-
-def fdconvolution(x,y1,y2,fd1=None,fd2=None):
-    """Fermi Dirac convolution"""
-    if fd1 is None and fd2 is None: # no function given
-        return np.convolve(y1,y2,mode="same")/len(y1)
-        f1 = interpolate(x,y1) # interpolate
-        f2 = interpolate(x,y2) # interpolate
-        dx = max(x) - min(x)
-        xs = np.linspace(min(x)-dx,max(x)+dx,len(x)*20) # as many points
-        y3 = np.convolve(f1(xs),f2(xs),mode="same")
-        return interpolate(xs,y3)(x)
-    else: # assume that there is a Fermi Dirac distribution as input 
-        from .fdconvolution import fdconv
-        if callable(fd1): fd1x = fd1(x) # call function
-        else: fd1x = fd1 # assume it is an array
-        if callable(fd2): fd2x = fd2(x) # call function
-        else: fd2x = fd2 # assume it is an array
-        return fdconv(y1,y2,fd1x,fd2x)/len(x)
-
 
 
 
@@ -189,6 +126,7 @@ def convolve_dos(x1,y1,x2,y2,n=None,Ttip=0.0,Tsur=0.0,T=None):
 #    xmax = np.max([np.max(x1),np.max(x2)])
     if n is None: n = len(x1) # as many as x1
     xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
+    from .fdconvolution import fdconvolution
     yc = fdconvolution(xs,f1(xs),f2(xs),fd1=fd1(xs),fd2=fd2(xs))
     yo = interpolate(xs,yc)(x1)
     return (x1,yo) # return
