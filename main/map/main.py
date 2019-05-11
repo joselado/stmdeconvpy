@@ -32,11 +32,15 @@ for s in argsin: instr += " "+s
 
 name = "2d.data"
 m = dataset.mapsplit(name) # read the data
-# create output files
+# create output variables
 x = []
 y = []
 z = []
 d = []
+#
+x2 = []
+y2 = []
+z2 = []
 os.system("mkdir stmdeconvtmp")
 print("Creating folder stmdeconvtmp, it will be cleaned at the end")
 os.chdir("stmdeconvtmp") # go to the folder
@@ -44,12 +48,18 @@ for i in range(len(m)):
     mi = m[i]
     np.savetxt("temp.txt",np.array([mi[0],mi[2]]).T)
     os.system("stmdeconvpy --show false --input temp.txt "+instr)
+    # read the deconvoluted DOS
     out = np.genfromtxt("DECONVOLUTED_DOS.OUT").T # get the data
     x = np.concatenate([x,out[0]])
     y = np.concatenate([y,mi[1]])
     z = np.concatenate([z,out[1]])
     d = np.concatenate([d,out[2]])
-    np.savetxt("../DECONVOLUTED_DOS_MAP.OUT",np.array([x,y,z,d]).T)
+    # now read the recovoluted dIdV
+    out2 = np.genfromtxt("dIdV_OUTPUT.OUT").T # get the data
+    x2 = np.concatenate([x2,out2[0]])
+    y2 = np.concatenate([y2,mi[1]])
+    z2 = np.concatenate([z2,out2[1]])
+    np.savetxt("../dIdV_OUTPUT_MAP.OUT",np.array([x2,y2,z2]).T)
     print("Saved data in DECONVOLUTED_DOS_MAP.OUT")
 os.system("cp TIP_DOS.OUT ../") # copy to the previous folder
 os.chdir("..")
