@@ -32,7 +32,7 @@ def dynes_superconductor(delta=0.1,gamma=0.0):
             if den2[i].imag>0.0:  den[i] = den2[i] # positive
             else: den[i] = -den2[i]
         num = x + 1j*gamma # compute numerator
-        return (num/den).real # return profile
+        return np.abs((num/den).real) # return profile
     return f
 
 
