@@ -92,6 +92,15 @@ if args.TinKVinmeV=="true":
     Tsur = Tsur*k2mev
 
 
+# add the temperature smearing to the tip
+def f(x,y):
+  (x,y) = deconvolve.dos2dIdV(x,y,x,y*0.0+1.0,Ttip=Ttip,Tsur=Ttip)
+  np.savetxt("THERMAL_"+args.tip_output,np.array([x,y]).T)
+f(V,dos_tip) # write in file
+
+
+
+
 # deconvolve the signal
 xn,dos_sur_dc,error = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,
         return_error = True,n=maxn,
