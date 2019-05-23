@@ -30,7 +30,7 @@ for i in range(len(args)):
 instr = ""
 for s in argsin: instr += " "+s
 
-name = "2d.data"
+#name = "2d.data"
 m = dataset.mapsplit(name) # read the data
 # create output variables
 x = []
