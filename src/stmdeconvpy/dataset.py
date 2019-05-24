@@ -43,11 +43,11 @@ def crop_uncertainty(x,y,d):
 def readmap(name):
     """Read a map file"""
     ls = open(name).readlines() # read the file
-    f = open(name+".txt","w")
+    f = open("dIdV_INPUT_MAP.OUT","w")
     for i in range(len(ls)): # loop
         if i>3: f.write(ls[i]+"  ")
     f.close()
-    m = np.genfromtxt(name+".txt").T # return data
+    m = np.genfromtxt("dIdV_INPUT_MAP.OUT").T # return data
 #    np.savetxt(name+".txt",np.array([m[1],m[0],m[2]]).T)
     return m
 

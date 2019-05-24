@@ -3,7 +3,7 @@
 
 AddImportPath(u'/home/jose/Documents/programs/stmdeconvpy/examples/2d')
 ImportFile(u'DECONVOLUTED_DOS_MAP.OUT', u'x y z d', ignoretext=True, linked=True)
-ImportFile(u'2d.data.txt', u'x0 y0 z0', ignoretext=True, linked=True)
+ImportFile(u'dIdV_INPUT_MAP.OUT', u'x0 y0 z0', ignoretext=True, linked=True)
 ImportFile(u'dIdV_OUTPUT_MAP.OUT', u'x1 y1 z1', ignoretext=True, linked=True)
 Set('colorTheme', 'default-latest')
 Set('StyleSheet/axis-function/autoRange', 'next-tick')
