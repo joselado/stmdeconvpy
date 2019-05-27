@@ -20,7 +20,7 @@ parser.add_argument("--show",default="true",help='Show the result')
 args = parser.parse_args()
 
 
-V = np.linspace(-args.Vwindow,args.Vwindow,1000)
+V = np.linspace(-float(args.Vwindow),float(args.Vwindow),1000)
 
 delta = float(args.delta) # get the superconducting gap
 gamma = float(args.gamma) # get the superconducting gamma

@@ -14,6 +14,7 @@ def show_tip_dos():
     delta = str(get_energy("delta"))
     gamma = str(get_energy("gamma"))
     args = " --delta "+ delta +" --gamma "+gamma
+    args += " --Vwindow "+ str(get_energy("ewindow"))
     os.system("python "+path+"/stmdeconvpy-tipdos"+args)
 
 
@@ -24,13 +25,17 @@ def deconvolve():
     args += " --delta " + str(get_energy("delta")) # input file
     args += " --gamma " + str(get_energy("gamma")) # input file
     args += " --maxn " + str(int(app.get("maxn"))) # input file
+    args += " --ntries " + str(int(app.get("ntries")))
     args += " --Ttip " + str(get_energy("Ttip"))
     args += " --Tsur " + str(get_energy("Tsur"))
+    args += " --show false "
     if app.getbox("box_mode")=="Algebra":
       args += " --mode algebra "
-    os.system("stmdeconvpy-single"+args+" &")
+    os.system("stmdeconvpy-single"+args+" ")
+    os.system("stmdeconvpy-show-deconv  &")
 
-
+def show_deconvolution():
+    os.system("stmdeconvpy-show-deconv  &")
 
 def set_units(form):
     """Add the different units"""
@@ -42,7 +47,7 @@ def set_units(form):
       cs = ["meV","K","eV"]
       cb.clear() # clear the items
       cb.addItems(cs)
-    cs = ["Ttip","Tsur","delta","gamma"]
+    cs = ["Ttip","Tsur","delta","gamma","ewindow"]
     for c in cs:  set_unit_single("box_"+c)
 
 def get_energy(name):
@@ -80,6 +85,7 @@ signals = dict() # functions to call
 signals["show_tip_dos"] = show_tip_dos
 signals["show_input"] = show_input
 signals["deconvolve"] = deconvolve
+signals["show_deconvolution"] = show_deconvolution
 app.connect_clicks(signals)
 # now initialize the interface
 app.run()
