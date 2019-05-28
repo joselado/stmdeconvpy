@@ -70,9 +70,9 @@ def get_energy(name):
 def show_input():
     args = ""
     args += "--input "+app.getbox("box_input_file")
-    os.system("stmdeconvpy-input "+args+" &")
     clean_data()
-    set_data_input()
+    os.system("stmdeconvpy-input "+args+" ")
+#    set_data_input()
 
 
 
