@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 
 
 import pylab as py
@@ -11,6 +11,8 @@ matplotlib.rcParams.update({'font.size': 18})
 matplotlib.rcParams['font.family'] = "Bitstream Vera Serif"
 fig = py.figure()
 fig.subplots_adjust(0.2,0.2)
+ff = plt.gcf()
+ff.canvas.set_window_title('Deconvoluted 2D dIdV')
 
 
 fig.set_facecolor("white")
@@ -49,7 +51,7 @@ plotpanel(x,y,z,label="DOS surface")
 plt.subplot(222)
 (x,y,z) = get("dIdV_OUTPUT_MAP.OUT")
 print("PLotting obtained dIdV from dIdV_OUTPUT_MAP.OUT")
-plotpanel(x,y,z,label="Obtanied dIdV",noy=True)
+plotpanel(x,y,z,label="Obtained dIdV",noy=True)
 
 
 plt.subplot(223)

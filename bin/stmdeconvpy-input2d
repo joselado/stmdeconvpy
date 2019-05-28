@@ -1,0 +1,67 @@
+#!/usr/bin/python
+
+
+import pylab as py
+import sys
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+
+
+import os
+
+path = os.path.dirname(os.path.realpath(__file__))
+import sys
+sys.path.append(path+"/../src") # add the library
+from stmdeconvpy import dataset
+matplotlib.rcParams.update({'font.size': 18})
+matplotlib.rcParams['font.family'] = "Bitstream Vera Serif"
+fig = py.figure()
+fig.subplots_adjust(0.2,0.2)
+
+
+
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--input",default="data.txt",help='Input file')
+args = parser.parse_args()
+
+
+
+fig.set_facecolor("white")
+
+
+# deconvoluted DOS
+def get():
+  dataset.mapsplit(args.input) # import data
+  m = np.genfromtxt("dIdV_INPUT_MAP.OUT").T
+  x = m[0]
+  y = m[1]
+  z = m[2]
+  return (x,y,z)
+
+
+def plotpanel(x,y,z,label=""):
+  xi = np.linspace(min(x)/2, max(x)/2, 100)
+  yi = np.linspace(min(y), max(y), 100)
+  # grid the data.
+  from matplotlib.mlab import griddata
+  zi = griddata(x, y, z, xi, yi, interp='linear')
+  S = plt.contourf(xi, yi, zi, 100,vmax=abs(zi).max(),vmin=0,cmap="inferno")
+  plt.xlabel("Energy [meV]")
+  plt.ylabel("Position [nm]")
+  plt.title(label)
+  plt.colorbar(ticks=[])
+  return S
+
+plt.subplots_adjust(hspace=0.4)
+
+(x,y,z) = get() # get data
+print("PLotting original dIdV from dIdV_INPUT_MAP.OUT")
+plotpanel(x,y,z,label="Experimental dIdV")
+
+
+#  plt.colorbar()  # draw colorbar
+plt.show()
+

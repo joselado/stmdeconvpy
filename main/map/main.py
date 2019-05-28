@@ -68,4 +68,4 @@ os.system("rm -rf stmdeconvtmp") # cleaning temporal folder
 print("Deconvolution finished")
 
 
-os.system("stmdeconvpy_plotmap") # plot results
+#os.system("stmdeconvpy_plotmap") # plot results

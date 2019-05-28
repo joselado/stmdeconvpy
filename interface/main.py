@@ -9,6 +9,11 @@ import qtwrap # import the library with simple wrappers
 app = qtwrap.App() # this is the main interface
 
 
+def pyexecute(name):
+    """Execute a python script"""
+    os.system("python "+path+name)
+
+
 def show_tip_dos():
     """Show the Tip DOS"""
     delta = str(get_energy("delta"))
@@ -31,18 +36,27 @@ def deconvolve():
     args += " --Ttip " + str(get_energy("Ttip"))
     args += " --Tsur " + str(get_energy("Tsur"))
     args += " --show false "
+    clean_data() # clean the text data
     if app.getbox("box_mode")=="Algebra":
       args += " --mode algebra "
-    os.system("stmdeconvpy-single"+args+" ")
-    os.system("stmdeconvpy-show-deconv  &")
+    if app.getbox("box_input_dimension")=="1D":
+      pyexecute("stmdeconvpy-single"+args+" ")
+      set_data_dos()
+      set_data_input()
+    elif app.getbox("box_input_dimension")=="2D":
+      pyexecute("stmdeconvpy2d"+args+" ")
+      set_data_dos2d()
+      set_data_input2d()
     # save the data
-    clean_data() # clean the text data
     set_data_tip_dos()
-    set_data_dos()
-    set_data_input()
+    show_deconvolution()
 
 def show_deconvolution():
-    os.system("stmdeconvpy-show-deconv  &")
+    if app.getbox("box_input_dimension")=="1D":
+      os.system("stmdeconvpy-show-deconv  &")
+    elif app.getbox("box_input_dimension")=="2D":
+      pyexecute("stmdeconvpy_plotmap  &")
+    else: raise
 
 def set_units(form):
     """Add the different units"""
@@ -71,7 +85,10 @@ def show_input():
     args = ""
     args += "--input "+app.getbox("box_input_file")
     clean_data()
-    os.system("stmdeconvpy-input "+args+" ")
+    if app.getbox("box_input_dimension")=="1D":
+      os.system("stmdeconvpy-input "+args+" ")
+    elif app.getbox("box_input_dimension")=="2D":
+      pyexecute("stmdeconvpy-input2d "+args+" ")
 #    set_data_input()
 
 
@@ -80,8 +97,10 @@ def get_inputs():
     """Get all the files that are possible inputs"""
     fs = os.listdir(os.getcwd()) # all the files
     out = []
+    forms = [".cur",".txt"]
     for f in fs:
-        if ".cur" in f: out.append(f) # store
+        for fm in forms:
+            if fm in f: out.append(f) # store
     cb = getattr(app,"box_input_file")
     cb.clear() # clear the items
     cb.addItems(out)
@@ -101,7 +120,9 @@ def clean_data():
 # define the different functions
 set_data_tip_dos = lambda: set_data("text_tip_dos","TIP_DOS.OUT")
 set_data_dos = lambda: set_data("text_dos","DECONVOLUTED_DOS.OUT")
+set_data_dos2d = lambda: set_data("text_dos","DECONVOLUTED_DOS_MAP.OUT")
 set_data_input = lambda: set_data("text_input","dIdV_INPUT.OUT")
+set_data_input2d = lambda: set_data("text_input","dIdV_INPUT_MAP.OUT")
 
 
 set_units(app) # set the units

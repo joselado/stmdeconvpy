@@ -33,7 +33,7 @@
          <item row="0" column="1">
           <widget class="QComboBox" name="box_input_file">
            <property name="toolTip">
-            <string>Select the input file, this menu will list the *.cur files of the current directory</string>
+            <string>Select the input file, this menu will list the *.cur and *.txt files of the current directory</string>
            </property>
           </widget>
          </item>
@@ -45,13 +45,18 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QComboBox" name="box_input_type">
+          <widget class="QComboBox" name="box_input_dimension">
            <property name="toolTip">
-            <string>Tipe of input file, 1D for a one-dimensional dIdV curve</string>
+            <string>Tipe of input file, 1D for a one-dimensional dIdV curve and 2D for a two-dimensional color map</string>
            </property>
            <item>
             <property name="text">
              <string>1D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>2D</string>
             </property>
            </item>
           </widget>
