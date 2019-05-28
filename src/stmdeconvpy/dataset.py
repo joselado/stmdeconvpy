@@ -55,9 +55,9 @@ def readmap(name):
 def mapsplit(name):
     """Split the map file into several"""
     m = readmap(name)
-    nx = (np.max(m[0])-np.min(m[0]))/(m[0][0]-m[0][1])
-    nx = int(round(nx,0))+1 # number of nx
-    ny = len(m[0])//nx # number of ny
+    y = np.unique(m[1]) # get values
+    ny = len(y) # number of ny
+    nx = len(m[0])//ny # number of ny
     out = [] # empty list
     print("Detected a grid",nx,ny)
     if nx*ny!=len(m[0]): raise
