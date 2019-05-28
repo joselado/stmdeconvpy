@@ -33,7 +33,7 @@
          <item row="0" column="1">
           <widget class="QComboBox" name="box_input_file">
            <property name="toolTip">
-            <string>Select the input file</string>
+            <string>Select the input file, this menu will list the *.cur files of the current directory</string>
            </property>
           </widget>
          </item>
@@ -58,6 +58,9 @@
          </item>
          <item row="2" column="0" colspan="2">
           <widget class="QPushButton" name="show_input">
+           <property name="toolTip">
+            <string>Show the input data</string>
+           </property>
            <property name="text">
             <string>Show input data</string>
            </property>
@@ -241,6 +244,9 @@
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="3" column="0" colspan="2">
           <widget class="QPushButton" name="deconvolve">
+           <property name="toolTip">
+            <string>Perform the deconvolution and plot the result</string>
+           </property>
            <property name="text">
             <string>Deconvolve</string>
            </property>
@@ -249,7 +255,7 @@
          <item row="0" column="1">
           <widget class="QComboBox" name="box_mode">
            <property name="toolTip">
-            <string>Select the calculation mode, &quot;Algebra&quot; is the fastest, &quot;Minimize&quot; allows to know the uncertainty of the deconvolution</string>
+            <string>Select the calculation mode, &quot;Algebra&quot; is the fastest but it can be numerically unstable, &quot;Minimize&quot; allows to know the uncertainty of the deconvolution</string>
            </property>
            <item>
             <property name="text">
@@ -306,6 +312,9 @@
          </item>
          <item row="4" column="0" colspan="2">
           <widget class="QPushButton" name="show_deconvolution">
+           <property name="toolTip">
+            <string>Plot the result of the deconvolution</string>
+           </property>
            <property name="text">
             <string>Show deconvolution</string>
            </property>
@@ -319,7 +328,7 @@
     <item row="1" column="1">
      <widget class="QGroupBox" name="groupBox_4">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="title">
        <string>Data</string>
@@ -327,11 +336,14 @@
       <layout class="QGridLayout" name="gridLayout_11">
        <item row="0" column="0">
         <widget class="QTabWidget" name="text_deconv_dos">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="toolTip">
           <string>Data files</string>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab">
           <attribute name="title">
@@ -353,7 +365,7 @@
           </attribute>
           <layout class="QGridLayout" name="gridLayout_8">
            <item row="0" column="0">
-            <widget class="QTextEdit" name="test_tip_dos">
+            <widget class="QTextEdit" name="text_tip_dos">
              <property name="toolTip">
               <string>DOS of the tip</string>
              </property>
@@ -367,7 +379,7 @@
           </attribute>
           <layout class="QGridLayout" name="gridLayout_7">
            <item row="0" column="0">
-            <widget class="QTextEdit" name="textEdit">
+            <widget class="QTextEdit" name="text_dos">
              <property name="toolTip">
               <string>Deconvoluted DOS</string>
              </property>

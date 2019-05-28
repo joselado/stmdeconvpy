@@ -15,7 +15,9 @@ def show_tip_dos():
     gamma = str(get_energy("gamma"))
     args = " --delta "+ delta +" --gamma "+gamma
     args += " --Vwindow "+ str(get_energy("ewindow"))
-    os.system("python "+path+"/stmdeconvpy-tipdos"+args)
+    os.system("python "+path+"/stmdeconvpy-tipdos"+args+" &")
+    clean_data() # clean the text data
+    set_data_tip_dos()
 
 
 def deconvolve():
@@ -33,6 +35,11 @@ def deconvolve():
       args += " --mode algebra "
     os.system("stmdeconvpy-single"+args+" ")
     os.system("stmdeconvpy-show-deconv  &")
+    # save the data
+    clean_data() # clean the text data
+    set_data_tip_dos()
+    set_data_dos()
+    set_data_input()
 
 def show_deconvolution():
     os.system("stmdeconvpy-show-deconv  &")
@@ -64,6 +71,8 @@ def show_input():
     args = ""
     args += "--input "+app.getbox("box_input_file")
     os.system("stmdeconvpy-input "+args+" &")
+    clean_data()
+    set_data_input()
 
 
 
@@ -76,6 +85,24 @@ def get_inputs():
     cb = getattr(app,"box_input_file")
     cb.clear() # clear the items
     cb.addItems(out)
+
+
+
+def set_data(label,name):
+    """Add the data of the Tip DOS to the window"""
+    app.settext(label,open(name).read())
+
+def clean_data():
+    """Clean all the text data"""
+    app.settext("text_tip_dos","")
+    app.settext("text_input","")
+    app.settext("text_dos","")
+
+# define the different functions
+set_data_tip_dos = lambda: set_data("text_tip_dos","TIP_DOS.OUT")
+set_data_dos = lambda: set_data("text_dos","DECONVOLUTED_DOS.OUT")
+set_data_input = lambda: set_data("text_input","dIdV_INPUT.OUT")
+
 
 set_units(app) # set the units
 get_inputs() # get the possible input files
