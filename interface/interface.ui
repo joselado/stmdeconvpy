@@ -253,12 +253,12 @@
            </property>
            <item>
             <property name="text">
-             <string>Algebra</string>
+             <string>Minimize</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Minimize</string>
+             <string>Algebra</string>
             </property>
            </item>
           </widget>
@@ -276,7 +276,7 @@
             <string>Number of grid points used in the deconvolution, the more the better</string>
            </property>
            <property name="text">
-            <string>300</string>
+            <string>100</string>
            </property>
           </widget>
          </item>

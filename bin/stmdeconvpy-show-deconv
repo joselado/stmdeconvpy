@@ -37,14 +37,24 @@ plt.xlim([min(m0[0]),max(m0[0])])
 plt.ylim([0,max(m0[1])*1.5])
 plt.legend()
 
-# plot the tip DOS
+# plot the DOS
 plt.subplot(122)
 plt.title("Deconvoluted DOS")
-plt.plot(m2[0],m2[1],c="black",linewidth=5)
+# crop to that window
+x = m2[0]
+y = m2[1]
+v = np.max(x)/2. # V window
+y = y[x>-v]
+x = x[x>-v]
+y = y[x<v]
+x = x[x<v]
+
+
+plt.plot(x,y,c="black",linewidth=5)
 plt.xlabel("Energy ["+args.xlabel+"]")
 plt.ylabel("DOS [a.u.]")
-plt.xlim([min(m2[0]),max(m2[0])])
-plt.ylim([0,max(m2[1])*1.5])
+plt.xlim([min(x),max(x)])
+plt.ylim([0,max(y)*1.5])
 
 
 plt.show()
