@@ -15,6 +15,8 @@ I_exp = deconvolve.dIdV2I(V,dIdV_exp) # get the current
 #V,I_exp = deconvolve.expand_I(V,I_exp)
 V,dIdV_exp = deconvolve.I2dIdV(V,I_exp)
 
+x,out = deconvolve.convolve_single_dfd(V,dIdV_exp,T=0.04)
+#print(out.shape,V.shape) ; exit()
 
 # define the superconducting DOS
 dos_tip = profiles.superconducting(delta=0.12,T=0.02)(V) # superconducting Tip
@@ -33,7 +35,7 @@ dos_tip = profiles.superconducting(delta=0.12,T=0.02)(V) # superconducting Tip
 import matplotlib.pyplot as plt
 
 # deconvolve the signal
-xn,dos_sur_dc = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,sol=None)
+xn,dos_sur_dc = deconvolve.deconvolve_I(V,I_exp,V,dos_tip)
 (V,I_exp2) = deconvolve.dos2I(V,dos_sur_dc,V,dos_tip)
 (V,dIdV_exp2) = deconvolve.dos2dIdV(V,dos_sur_dc,V,dos_tip)
 #xn,dos_sur_dc = deconvolve.deconvolve(V,I_exp,V,dos_tip,sol=dos_sur)
@@ -83,6 +85,8 @@ plt.legend()
 plt.subplot(222)
 #plt.plot(V,dos_sur,label="Surface DOS",c="red")
 plt.scatter(xn,dos_sur_dc,label="Deconvolved surface DOS",c="blue")
+xn,dos_sur_dc2 = deconvolve.convolve_single_dfd(xn,dos_sur_dc,T=0.01)
+plt.scatter(xn,dos_sur_dc2,label="DOS finite T",c="red")
 plt.xlim([np.min(V),np.max(V)])
 plt.xlabel("Energy [a.u.]")
 plt.ylabel("DOS [a.u.]")

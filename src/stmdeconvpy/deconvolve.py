@@ -108,6 +108,17 @@ def only_positive_derivative(x,y):
 
 
 
+def convolve_single_dfd(x,y,T=0.0):
+    """Convolve a signal with the derivative of the Fermi Dirac distribution"""
+    if T==0.0: return x,y
+    else:
+      fd = profiles.fermi_dirac_derivative(T=T)(x) # Fermi Dirac distribution
+      from .fdconvolution import plain_convolution
+      yo = plain_convolution(x,y,fd)
+      return x,yo
+
+
+
 def convolve_dos(x1,y1,x2,y2,n=None,Ttip=0.0,Tsur=0.0,T=None):
     """
     Convolve two signals

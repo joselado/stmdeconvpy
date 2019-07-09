@@ -35,6 +35,7 @@ def deconvolve():
     args += " --ntries " + str(int(app.get("ntries")))
     args += " --Ttip " + str(get_energy("Ttip"))
     args += " --Tsur " + str(get_energy("Tsur"))
+    args += " --Tdos " + str(get_energy("Tdos"))
     args += " --show false "
     clean_data() # clean the text data
     if app.getbox("box_mode")=="Algebra":
@@ -68,7 +69,7 @@ def set_units(form):
       cs = ["meV","K","eV"]
       cb.clear() # clear the items
       cb.addItems(cs)
-    cs = ["Ttip","Tsur","delta","gamma","ewindow"]
+    cs = ["Ttip","Tsur","Tdos","delta","gamma","ewindow"]
     for c in cs:  set_unit_single("box_"+c)
 
 def get_energy(name):

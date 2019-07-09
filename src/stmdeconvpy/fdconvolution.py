@@ -69,3 +69,10 @@ def fdconvolution(x,y1,y2,fd1=None,fd2=None):
         else: fd2x = fd2 # assume it is an array
         return fdconv(y1,y2,fd1x,fd2x)/len(x)
 
+
+
+
+def plain_convolution(x,y1,y2):
+    dx = (np.max(x) - np.min(x))/len(x)
+    return np.convolve(y1,y2,mode="same")*dx
+

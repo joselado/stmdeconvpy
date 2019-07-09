@@ -148,6 +148,23 @@ def fermi_dirac(T=0.0):
     return f # return the function
 
 
+def fermi_dirac_derivative(T=0.0):
+    """
+    Fermi Dirac distribution
+    """
+    if T==0.0: raise # zero temperature
+    else:
+        def f(x): 
+            o = np.exp(x/T)/T
+            return o/(1.0 + np.exp(x/T))**2
+    return f # return the function
+
+
+
+
+
+
+
 
 def dfd_dE(T=0.0):
     """

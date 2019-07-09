@@ -19,6 +19,7 @@ parser.add_argument("--dIdV_input",default="dIdV_INPUT.OUT",help='Input file wit
 parser.add_argument("--delta",default=0.12,help='Superconducting gap of the tip')
 parser.add_argument("--Ttip",default=0.02,help='Temperature of the tip')
 parser.add_argument("--Tsur",default=0.02,help='Temperature of the surface')
+parser.add_argument("--Tdos",default=0.02,help='Temperature of the surface DOS')
 parser.add_argument("--ntries",default=4,help='Take the best out of ntries minimizations')
 parser.add_argument("--maxn",default=100,help='Maximum number of grid points used in the deconvolution, increase it for higher accuracy')
 parser.add_argument("--gamma",default=0.01,help='Gamma smearing of the Dynes superconducting DOS')
@@ -107,9 +108,20 @@ xn,dos_sur_dc,error = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,
         ntries=int(args.ntries),print_error=False,Ttip=Ttip,
         Tsur=Tsur,mode=args.mode)
 
+
+
 # write the surface DOS
+def f(x,y,T):
+  if T>0.0: (x,y) = deconvolve.convolve_single_dfd(x,y,T=T)
+  np.savetxt(args.output,np.array([x,y]).T)
+Tdos = float(args.Tdos)
+f(xn,dos_sur_dc,T=Tdos) # write in file
 #xn,dos_sur_dc,error = dataset.crop_uncertainty(xn,dos_sur_dc,error)
-np.savetxt(args.output,np.array([xn,dos_sur_dc,error]).T)
+#np.savetxt(args.output,np.array([xn,dos_sur_dc,error]).T)
+
+
+
+
 print("Surface DOS written to ",args.output)
 
 (V,I_exp2) = deconvolve.dos2I(V,dos_sur_dc,V,dos_tip,
