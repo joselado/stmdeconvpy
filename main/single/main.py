@@ -25,7 +25,6 @@ parser.add_argument("--maxn",default=100,help='Maximum number of grid points use
 parser.add_argument("--gamma",default=0.01,help='Gamma smearing of the Dynes superconducting DOS')
 parser.add_argument("--show",default="true",help='Show the result')
 parser.add_argument("--mode",default="minimize",help='Mode of the calculation, minimize is the feault, whereas algebra is faster')
-parser.add_argument("--TinKVinmeV",default="false",help='Temperature in Kelvin, energies in meV')
 args = parser.parse_args()
 
 #### preprocessing of the arguments
@@ -85,12 +84,6 @@ import matplotlib.pyplot as plt
 
 Ttip = float(args.Ttip) # temperature of the tip
 Tsur = float(args.Tsur) # temperature of the tip
-
-if args.TinKVinmeV=="true":
-    print("Assuming temeperatures in K and energies in meV")
-    k2mev = 8.6217*1e-2
-    Ttip = Ttip*k2mev
-    Tsur = Tsur*k2mev
 
 
 # add the temperature smearing to the tip

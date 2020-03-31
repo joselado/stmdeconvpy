@@ -68,6 +68,7 @@ def single_deconvolve_minimize(x1,yexp,x2,ytip,n=41,sol=None,
 #        print(np.max(np.abs(diff)))
         return diff
     def f(y):
+        """Function to compute the error"""
         dd = fdiff(y)
         # compute the error
         error = np.abs(dd) #+ np.mean(np.abs(np.diff(dd))) 
