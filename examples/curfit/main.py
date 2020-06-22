@@ -35,7 +35,8 @@ dos_tip = profiles.superconducting(delta=0.12,T=0.02)(V) # superconducting Tip
 import matplotlib.pyplot as plt
 
 # deconvolve the signal
-xn,dos_sur_dc = deconvolve.deconvolve_I(V,I_exp,V,dos_tip)
+xn,dos_sur_dc = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,mode="algebra",
+        ntries=1)
 (V,I_exp2) = deconvolve.dos2I(V,dos_sur_dc,V,dos_tip)
 (V,dIdV_exp2) = deconvolve.dos2dIdV(V,dos_sur_dc,V,dos_tip)
 #xn,dos_sur_dc = deconvolve.deconvolve(V,I_exp,V,dos_tip,sol=dos_sur)

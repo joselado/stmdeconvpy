@@ -5,7 +5,7 @@ from scipy.interpolate import interp1d
 from scipy.optimize import minimize,anderson
 
 
-def best_deconvolve(x1,yexp,x2,ytip,ntries=4,return_error=False,
+def best_deconvolve(x1,yexp,x2,ytip,ntries=1,return_error=False,
         **kwargs):
     """Return the best deconvolution"""
     def f(sol):
@@ -34,7 +34,7 @@ def best_deconvolve(x1,yexp,x2,ytip,ntries=4,return_error=False,
 
 
 def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,
-        sol=None,sgfilter=True,n=100,mode="minimize",**kwargs):
+        sol=None,sgfilter=True,n=200,mode="algebra",**kwargs):
     """Perform a deconvolution of a signal"""
     if ns is None:
 #        ns = [21,41,91,131]

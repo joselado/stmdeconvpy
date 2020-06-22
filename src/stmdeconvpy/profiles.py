@@ -178,3 +178,18 @@ def dfd_dE(T=0.0):
             return w/T/(1.0 + w)**2
     return f # return the function
 
+
+def integrate(x,y):
+    yi = integrate_array(x,y) # integrate
+    f = interpolate(x,yi) # interpolate
+    yi = normalize(f(x) - f(0)) # set to zero
+    return yi
+
+
+
+def integrate_array(x,y):
+    """Integrate an array"""
+    out = np.array([np.trapz(y[0:n],x[0:n]) for n in range(len(x))])
+#    out = normalize(out)
+    return out # retunr array
+

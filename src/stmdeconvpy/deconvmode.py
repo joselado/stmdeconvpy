@@ -1,9 +1,9 @@
 import numpy as np
 from .fdconvolution import fdconvolution
-from .profiles import interpolate
+from .profiles import interpolate,derivative,integrate
 
 
-def single_deconvolve_algebra(x1,yexp,x2,ytip,n=41,sol=None,
+def single_deconvolve_algebra(x1,yexp,x2,ytip,n=200,sol=None,
         return_error=True,print_error=True,
         fd1=None,fd2=None,**kwargs):
     """
@@ -22,18 +22,27 @@ def single_deconvolve_algebra(x1,yexp,x2,ytip,n=41,sol=None,
     else: fdx = None
     def LO(y): # function returning the linear action on the DOS
         out = fdconvolution(xs,y,ytipn,fd1=fd1x,fd2=fd2x) # special convolution
+        out = derivative(xs,out) # compute the derivative
         return out
     # create the matrix of the linear operator
-    MLO = np.zeros((n,n),dtype=np.complex) # initialize
+    MLO = np.zeros((n,n)) # initialize
     for i in range(n): # loop
         v = np.zeros(n) ; v[i] = 1.0 # element of the basis
         w = LO(v)
-        MLO[:,i] = w # store
+        MLO[:,i] = w.real # store
     import scipy.linalg as lg
  #   for i in range(n): MLO[i,i] += 1j*0.01
  #   yout = lg.solve(MLO,yexpn).real
-    yout = lg.lstsq(MLO,yexpn,cond=1e-5)[0]
-    error = 1.0
+    yexpn = derivative(xs,yexpn) # derivative
+    def funerror(cond):
+      yout = lg.lstsq(MLO,yexpn,cond=cond)[0]
+      error = np.mean(np.abs(yout-yexpn))
+      return error
+    cs = [1e-1,1e-2,1e-3,1e-4] # try this errors
+    errs = [funerror(c) for c in cs] # different errors
+#    yout = integrate(xs,yout) # now integrate the signal
+    error = min(errs) # error
+    yout = lg.lstsq(MLO,yexpn,cond=cs[errs.index(min(errs))])[0]
     yout = interpolate(xs,yout,positive=True)(x1)
     if return_error:  return (x1,yout,error)
     else:  return (x1,yout)

@@ -4,6 +4,7 @@ sys.path.append("../../src")
 import numpy as np
 from stmdeconvpy import deconvolve
 from stmdeconvpy import profiles
+import matplotlib.pyplot as plt
 V = np.linspace(-4.0,4.0,200) # energies
 
 # define the superconducting DOS
@@ -15,7 +16,7 @@ np.savetxt("TIP.OUT",np.array([V,dos_tip]).T)# ; exit()
 
 # define the real DOS
 dos_sur = profiles.random_peaks(nmin=3,nmax=3,xmin=-1.0,xmax=1.0,wmin=0.05,wmax=0.2)(V)
-dos_sur = profiles.peak(w=0.1)(V)
+#dos_sur = profiles.peak(w=0.1)(V)
 # and its associated signals (for testing purpose)
 (V,I_exp) = deconvolve.dos2I(V,dos_sur,V,dos_tip)
 # add some noise to the signal
@@ -23,7 +24,6 @@ dos_sur = profiles.peak(w=0.1)(V)
 
 # and compute the experimental dIdV
 (V,dIdV_exp) = deconvolve.I2dIdV(V,I_exp)
-
 
 #####################################################################
 ############# You do not need to change anything else ###############
@@ -34,10 +34,10 @@ dos_sur = profiles.peak(w=0.1)(V)
 
 
 
-import matplotlib.pyplot as plt
 
 # deconvolve the signal
-xn,dos_sur_dc = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,sol=None)
+xn,dos_sur_dc = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,
+        mode="algebra")
 (V,I_exp2) = deconvolve.dos2I(V,dos_sur_dc,V,dos_tip)
 (V,dIdV_exp2) = deconvolve.dos2dIdV(V,dos_sur_dc,V,dos_tip)
 #xn,dos_sur_dc = deconvolve.deconvolve(V,I_exp,V,dos_tip,sol=dos_sur)
