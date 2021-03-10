@@ -73,4 +73,9 @@ def mapsplit(name):
 
 
 
+def griddata(x, y, z, xi, yi, **kwargs):
+    from scipy.interpolate import griddata
+    xd,yd = np.meshgrid(xi,yi)
+    zi = griddata(np.array([x, y]).T, z, np.array([xd, yd]).T, method='linear')
+    return zi.T
 

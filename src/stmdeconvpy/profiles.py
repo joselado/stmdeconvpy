@@ -80,7 +80,8 @@ def derivative(x,y):
 from scipy.interpolate import interp1d
 def interpolate(x,y,mode="cubic",positive=False):
     if positive: # enforce the function to be positive
-        y2 = np.abs(y) # enforce the function to be positive
+        y2 = y*1.# enforce the function to be positive
+        y2[y2<0.] = 0.
     else: y2 = y
     f = interp1d(x,y2,fill_value=(y[0],y[len(y)-1]),
             bounds_error=False,kind=mode)
@@ -88,6 +89,17 @@ def interpolate(x,y,mode="cubic",positive=False):
         f2 = lambda x: np.abs(f(x))
     else: f2 = f
     return f
+
+
+def discard_edge(x,y,r=0.2):
+    """Discard the edges of the signal"""
+    f = interpolate(x,y,mode="cubic",positive=True)
+    dx = r*(np.max(x) - np.min(x))/2.
+    xi = np.linspace(np.min(x)+dx,np.max(x)-dx,len(x))
+    yc = f(xi) # cropped signal
+    fc = interpolate(xi,yc,mode="cubic",positive=True)
+    return x,fc(x)
+
 
 
 

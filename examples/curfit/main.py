@@ -35,7 +35,7 @@ dos_tip = profiles.superconducting(delta=0.12,T=0.02)(V) # superconducting Tip
 import matplotlib.pyplot as plt
 
 # deconvolve the signal
-xn,dos_sur_dc = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,mode="algebra",
+xn,dos_sur_dc = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,mode="minimize",
         ntries=1)
 (V,I_exp2) = deconvolve.dos2I(V,dos_sur_dc,V,dos_tip)
 (V,dIdV_exp2) = deconvolve.dos2dIdV(V,dos_sur_dc,V,dos_tip)
@@ -44,8 +44,8 @@ xn,dos_sur_dc = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,mode="algebra",
 
 # now plot the results
 import matplotlib
-matplotlib.rcParams.update({'font.size': 16})
-matplotlib.rcParams['font.family'] = "Bitstream Vera Serif"
+#matplotlib.rcParams.update({'font.size': 16})
+#matplotlib.rcParams['font.family'] = "Bitstream Vera Serif"
 fig = plt.figure()
 fig.subplots_adjust(0.2,0.2)
 

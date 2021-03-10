@@ -33,7 +33,7 @@ def best_deconvolve(x1,yexp,x2,ytip,ntries=1,return_error=False,
 
 
 
-def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,
+def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,crop=True,
         sol=None,sgfilter=True,n=200,mode="algebra",**kwargs):
     """Perform a deconvolution of a signal"""
     if ns is None:
@@ -48,7 +48,8 @@ def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,
     for ni in ns:
       (x,sol,error) = single_deconvolve(x1,yexp,x2,ytip,n=ni,sol=sol,
               return_error=True,**kwargs)
-      if sgfilter: sol = smoothen(sol) # smoothen the solution
+    if crop: x,sol = profiles.discard_edge(x,sol,r=0.1)
+    if sgfilter: sol = smoothen(sol) # smoothen the solution
     print("Error in this minimization",error)
     if return_error: return x,sol,error
     else: return x,sol
@@ -56,10 +57,13 @@ def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,
 
 def smoothen(sol):
     """Smoothen a signal"""
+    sol = sol**2
     from scipy.signal import savgol_filter
     dn = max([2*(len(sol)//50)+1,3])
 #    dn = 5
-    return savgol_filter(sol,dn,3)
+    out = savgol_filter(sol,dn,3)
+    out = np.abs(out)
+    return np.sqrt(out)
 
 
 
@@ -131,8 +135,8 @@ def convolve_dos(x1,y1,x2,y2,n=None,Ttip=0.0,Tsur=0.0,T=None):
         fd2 = profiles.fermi_dirac(T=Tsur) # Fermi Dirac distribution
     f1 = interpolate(x1,y1)
     f2 = interpolate(x2,y2)
-    xmax =  np.max(np.abs([np.max(x1),np.max(x2)]))
-    xmin = -xmax # same
+    xmax =  np.min([np.max(x1),np.max(x2)])
+    xmin =  np.max([np.min(x1),np.min(x2)])
 #    xmin = np.min([np.min(x1),np.min(x2)])
 #    xmax = np.max([np.max(x1),np.max(x2)])
     if n is None: n = len(x1) # as many as x1
@@ -158,6 +162,7 @@ def dos2I(x1,y1,x2,y2,**kwargs):
 def I2dIdV(x,y):
     """COmpute dIdV from I"""
     dy = derivative(x,y) # compute the derivative
+    dy[dy<0.] = 0.
 #    dy = normalize(dy) # normalize profile
     return (x,dy) # return x and derivative
 

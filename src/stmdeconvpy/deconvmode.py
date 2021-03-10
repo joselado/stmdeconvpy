@@ -36,9 +36,10 @@ def single_deconvolve_algebra(x1,yexp,x2,ytip,n=200,sol=None,
     yexpn = derivative(xs,yexpn) # derivative
     def funerror(cond):
       yout = lg.lstsq(MLO,yexpn,cond=cond)[0]
+      yout[yout<0.] = 0. # set to zero
       error = np.mean(np.abs(yout-yexpn))
       return error
-    cs = [1e-1,1e-2,1e-3,1e-4] # try this errors
+    cs = [1e-1,1e-2,1e-3,1e-4,1e-5] # try this errors
     errs = [funerror(c) for c in cs] # different errors
 #    yout = integrate(xs,yout) # now integrate the signal
     error = min(errs) # error

@@ -7,6 +7,8 @@ sys.path.append(path+"/../../src") # add the library
 import numpy as np
 import sys
 from stmdeconvpy import dataset
+from stmdeconvpy.stmpath import binpath
+from stmdeconvpy.stmpath import binexecute
 
 if len(sys.argv)>1:
     args = sys.argv[1:] # get the arguments
@@ -46,14 +48,16 @@ print("Creating folder stmdeconvtmp, it will be cleaned at the end")
 os.chdir("stmdeconvtmp") # go to the folder
 for i in range(len(m)):
     mi = m[i]
-    np.savetxt("temp.txt",np.array([mi[0],mi[2]]).T)
-    os.system("stmdeconvpy --show false --input temp.txt "+instr)
+    np.savetxt("temp.txt",np.array([mi[0],np.abs(mi[2])]).T)
+    binexecute("stmdeconvpy --show false --input temp.txt "+instr)
+    #os.system("stmdeconvpy --show false --input temp.txt "+instr)
     # read the deconvoluted DOS
     out = np.genfromtxt("DECONVOLUTED_DOS.OUT").T # get the data
     x = np.concatenate([x,out[0]])
     y = np.concatenate([y,mi[1]])
     z = np.concatenate([z,out[1]])
-    d = np.concatenate([d,out[2]])
+    if len(out)==3:  d = np.concatenate([d,out[2]])
+    else:  d = np.concatenate([d,out[1]*0.])
     np.savetxt("../DECONVOLUTED_DOS_MAP.OUT",np.array([x,y,z,d]).T)
     print("Saved data in DECONVOLUTED_DOS_MAP.OUT")
     # now read the recovoluted dIdV

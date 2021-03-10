@@ -54,7 +54,7 @@ def deconvolve():
 
 def show_deconvolution():
     if app.getbox("box_input_dimension")=="1D":
-      os.system("stmdeconvpy-show-deconv  &")
+      pyexecute("stmdeconvpy-show-deconv  &")
     elif app.getbox("box_input_dimension")=="2D":
       pyexecute("stmdeconvpy_plotmap  &")
     else: raise
@@ -87,7 +87,7 @@ def show_input():
     args += "--input "+app.getbox("box_input_file")
     clean_data()
     if app.getbox("box_input_dimension")=="1D":
-      os.system("stmdeconvpy-input "+args+" ")
+      pyexecute("stmdeconvpy-input "+args+" ")
     elif app.getbox("box_input_dimension")=="2D":
       pyexecute("stmdeconvpy-input2d "+args+" ")
 #    set_data_input()

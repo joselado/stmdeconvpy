@@ -1,75 +1,87 @@
 #!/usr/bin/python
 
 
-import pylab as py
-import sys
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
+def get_plot():
+    
+    import pylab as py
+    import sys
+    import numpy as np
+    import matplotlib
+    import matplotlib.pyplot as plt
+    
+#    matplotlib.rcParams.update({'font.size': 18})
+#    matplotlib.rcParams['font.family'] = "Bitstream Vera Serif"
+    fig = py.figure()
+    fig.subplots_adjust(0.2,0.2)
+    ff = plt.gcf()
+    ff.canvas.set_window_title('Deconvoluted 2D dIdV')
+    
+    
+    import os
+    
+    path = os.path.dirname(os.path.realpath(__file__))
+    import sys
+    sys.path.append(path+"/../src") # add the library
+    
+    fig.set_facecolor("white")
+    
+    
+    # deconvoluted DOS
+    def get(name):
+      m = np.genfromtxt(name).transpose()
+      x = m[0]
+      y = m[1]
+      z = m[2]
+      return (x,y,z)
+    
+    
+    def plotpanel(x,y,z,label="",noy=False,cbar=False):
+      xi = np.linspace(min(x), max(x), 100)
+      yi = np.linspace(min(y), max(y), 100)
+      # grid the data.
+      from stmdeconvpy.dataset import griddata
+      zi = griddata(x, y, z, xi, yi, interp='linear')
+      S = plt.contourf(xi, yi, zi, 100,vmax=abs(zi).max(),vmin=0,cmap="inferno")
+      plt.xlabel("Energy [meV]")
+      if noy: plt.yticks([])
+      else: plt.ylabel("Position [nm]")
+      plt.title(label)
+      if cbar: plt.colorbar(ticks=[])
+      return S
+    
+    plt.subplots_adjust(hspace=0.2,wspace=0.2)
+    
+    plt.subplot(221)
+    (x,y,z) = get("DECONVOLUTED_DOS_MAP.OUT")
+    print("Plotting DOS from DECONVOLUTED_DOS_MAP.OUT")
+    plotpanel(x,y,z,label="DOS surface")
+    
+    plt.subplot(222)
+    (x,y,z) = get("dIdV_OUTPUT_MAP.OUT")
+    print("PLotting obtained dIdV from dIdV_OUTPUT_MAP.OUT")
+    plotpanel(x,y,z,label="Obtained dIdV",noy=True)
+    
+    
+    plt.subplot(223)
+    m = np.genfromtxt("TIP_DOS.OUT").transpose()
+    plt.plot(m[0],m[1])
+    plt.xlabel("Energy [meV]")
+    plt.xlim(min(m[0]),max(m[0]))
+    plt.ylabel("DOS [a.u.]")
+    plt.title("Tip DOS")
+    print("PLotting tip DOS from TIP_DOS.OUT")
+    
+    
+    plt.subplot(224)
+    (x,y,z) = get("dIdV_INPUT_MAP.OUT")
+    print("PLotting original dIdV from dIdV_INPUT_MAP.OUT")
+    plotpanel(x,y,z,label="Original dIdV",noy=True)
+    fig.tight_layout()
+    return fig
 
-matplotlib.rcParams.update({'font.size': 18})
-matplotlib.rcParams['font.family'] = "Bitstream Vera Serif"
-fig = py.figure()
-fig.subplots_adjust(0.2,0.2)
-ff = plt.gcf()
-ff.canvas.set_window_title('Deconvoluted 2D dIdV')
 
-
-fig.set_facecolor("white")
-
-
-# deconvoluted DOS
-def get(name):
-  m = np.genfromtxt(name).transpose()
-  x = m[0]
-  y = m[1]
-  z = m[2]
-  return (x,y,z)
-
-
-def plotpanel(x,y,z,label="",noy=False,cbar=False):
-  xi = np.linspace(min(x)/2, max(x)/2, 100)
-  yi = np.linspace(min(y), max(y), 100)
-  # grid the data.
-  from matplotlib.mlab import griddata
-  zi = griddata(x, y, z, xi, yi, interp='linear')
-  S = plt.contourf(xi, yi, zi, 100,vmax=abs(zi).max(),vmin=0,cmap="inferno")
-  plt.xlabel("Energy [meV]")
-  if noy: plt.yticks([])
-  else: plt.ylabel("Position [nm]")
-  plt.title(label)
-  if cbar: plt.colorbar(ticks=[])
-  return S
-
-plt.subplots_adjust(hspace=0.4)
-
-plt.subplot(221)
-(x,y,z) = get("DECONVOLUTED_DOS_MAP.OUT")
-print("PLotting DOS from DECONVOLUTED_DOS_MAP.OUT")
-plotpanel(x,y,z,label="DOS surface")
-
-plt.subplot(222)
-(x,y,z) = get("dIdV_OUTPUT_MAP.OUT")
-print("PLotting obtained dIdV from dIdV_OUTPUT_MAP.OUT")
-plotpanel(x,y,z,label="Obtained dIdV",noy=True)
-
-
-plt.subplot(223)
-m = np.genfromtxt("TIP_DOS.OUT").transpose()
-plt.plot(m[0],m[1])
-plt.xlabel("Energy [meV]")
-plt.xlim(min(m[0])/2,max(m[0])/2)
-plt.ylabel("DOS [a.u.]")
-plt.title("Tip DOS")
-print("PLotting tip DOS from TIP_DOS.OUT")
-
-
-plt.subplot(224)
-(x,y,z) = get("dIdV_INPUT_MAP.OUT")
-print("PLotting original dIdV from dIdV_INPUT_MAP.OUT")
-plotpanel(x,y,z,label="Original dIdV",noy=True)
-
-
-#  plt.colorbar()  # draw colorbar
-plt.show()
+if __name__=="__main__":
+    import matplotlib.pyplot as plt
+    fig = get_plot()
+    plt.show()
 
