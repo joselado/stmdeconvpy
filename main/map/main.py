@@ -22,7 +22,15 @@ for i in range(len(args)):
     if args[i]=="--help": 
       os.system("stmdeconvpy --help")
       exit()
-        
+
+
+def pread(name):
+    """Read the value of a certain parameter"""
+    for i in range(len(args)):
+        if args[i]=="--"+name: return int(args[i+1])
+    return None
+
+
 for i in range(len(args)):
     if args[i]=="--input": 
         name = args[i+1]
@@ -33,7 +41,9 @@ instr = ""
 for s in argsin: instr += " "+s
 
 #name = "2d.data"
-m = dataset.mapsplit(name) # read the data
+ny = pread("maxn") # maximum number of curves
+print("Enforcing",ny,"curves")
+m = dataset.mapsplit(name,ny=ny) # read the data
 # create output variables
 x = []
 y = []
@@ -49,6 +59,9 @@ os.chdir("stmdeconvtmp") # go to the folder
 for i in range(len(m)):
     mi = m[i]
     np.savetxt("temp.txt",np.array([mi[0],np.abs(mi[2])]).T)
+    print()
+    print("Computing ",mi[1][0])
+    print()
     binexecute("stmdeconvpy --show false --input temp.txt "+instr)
     #os.system("stmdeconvpy --show false --input temp.txt "+instr)
     # read the deconvoluted DOS

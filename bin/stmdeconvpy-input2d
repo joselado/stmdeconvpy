@@ -32,7 +32,6 @@ args = parser.parse_args()
 fig.set_facecolor("white")
 
 
-# deconvoluted DOS
 def get():
   dataset.mapsplit(args.input) # import data
   m = np.genfromtxt("dIdV_INPUT_MAP.OUT").T
