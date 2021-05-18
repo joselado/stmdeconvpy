@@ -39,12 +39,10 @@ print("The script will perform ",args.ntries,"minimizations")
 
 
 # get the data
-#(V,dIdV_exp) = dataset.opencur(args.input) # get the data
-(V,dIdV_exp) = dataset.openfile(args.input) # get the data
-#dIdV_exp = profiles.normalize(dIdV_exp)
-
-
-
+(V0,dIdV_exp0) = dataset.openfile(args.input) # get the data
+Vmin,Vmax = np.min(V0),np.max(V0) # minimum and maximum
+fcrop = dataset.crop(Vmin,Vmax) # function to crop the data
+(V,dIdV_exp) = dataset.symmetric_bounds(V0,dIdV_exp0) # use symmetric window
 
 
 I_exp = deconvolve.dIdV2I(V,dIdV_exp) # get the current
@@ -78,7 +76,7 @@ np.savetxt(args.tip_output,np.array([V,dos_tip]).T)
 ############# You do not need to change anything else ###############
 #####################################################################
 
-maxn = int(args.maxn) # points in the deconvolution
+maxn = 2*int(args.maxn) # points in the deconvolution
 
 import matplotlib.pyplot as plt
 
@@ -106,7 +104,7 @@ xn,dos_sur_dc,error = deconvolve.deconvolve_I(V,I_exp,V,dos_tip,
 # write the surface DOS
 def f(x,y,T):
   if T>0.0: (x,y) = deconvolve.convolve_single_dfd(x,y,T=T)
-  np.savetxt(args.output,np.array([x,y]).T)
+  np.savetxt(args.output,np.array(fcrop(x,y)).T)
 Tdos = float(args.Tdos)
 f(xn,dos_sur_dc,T=Tdos) # write in file
 #xn,dos_sur_dc,error = dataset.crop_uncertainty(xn,dos_sur_dc,error)
@@ -122,7 +120,7 @@ print("Surface DOS written to ",args.output)
 (V,dIdV_exp2) = deconvolve.dos2dIdV(V,dos_sur_dc,V,dos_tip,
         Ttip=Ttip,Tsur=Tsur)
 print("dIdV with deconvoluted DOS written to ",args.dIdV_output)
-np.savetxt(args.dIdV_output,np.array([V,dIdV_exp2]).T)
+np.savetxt(args.dIdV_output,np.array(fcrop(V,dIdV_exp2)).T)
 #xn,dos_sur_dc = deconvolve.deconvolve(V,I_exp,V,dos_tip,sol=dos_sur)
 
 

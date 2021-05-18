@@ -25,6 +25,29 @@ def openfile(name):
         return out[0],out[1]
 
 
+def symmetric_bounds(x,y):
+    """Return the data where the bounds are symmetric"""
+    from scipy.interpolate import interp1d
+    xwin = np.max(np.abs([np.min(x),np.max(x)]))
+    xo = np.linspace(-xwin,xwin,len(x),endpoint=True) # number of points
+    # interpolator
+    f = interp1d(x,y,fill_value=(np.min(y),np.max(y)),bounds_error=False) 
+    yo = f(xo)
+    return xo,yo
+
+
+def crop(xmin,xmax):
+    """Function to crop data"""
+    from scipy.interpolate import interp1d
+    def f(x,y):
+        f = interp1d(x,y,fill_value=(np.min(y),np.max(y)),bounds_error=False) 
+        xo = np.linspace(xmin,xmax,len(x),endpoint=True) # number of points
+        yo = f(xo)
+        return [xo,yo]
+    return f
+
+
+
 
 
 def crop_uncertainty(x,y,d):

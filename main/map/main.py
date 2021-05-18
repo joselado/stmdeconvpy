@@ -63,7 +63,6 @@ for i in range(len(m)):
     print("Computing ",mi[1][0])
     print()
     binexecute("stmdeconvpy --show false --input temp.txt "+instr)
-    #os.system("stmdeconvpy --show false --input temp.txt "+instr)
     # read the deconvoluted DOS
     out = np.genfromtxt("DECONVOLUTED_DOS.OUT").T # get the data
     x = np.concatenate([x,out[0]])
