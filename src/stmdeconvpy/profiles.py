@@ -78,7 +78,7 @@ def derivative(x,y):
 
 
 from scipy.interpolate import interp1d
-def interpolate(x,y,mode="cubic",positive=False):
+def interpolate(x,y,mode="linear",positive=False):
     if positive: # enforce the function to be positive
         y2 = y*1.# enforce the function to be positive
         y2[y2<0.] = 0.

@@ -21,9 +21,7 @@ def single_deconvolution(args):
         print("Calculation mode is algebra, taking a single try")
         ntries = 1
     
-    
-    
-    print("The script will perform ",args.ntries,"minimizations")
+#    print("The script will perform ",args.ntries,"minimizations")
     
     # get the data
     if type(args.input)==str:
@@ -67,7 +65,6 @@ def single_deconvolution(args):
     
     maxn = 2*int(args.maxn) # points in the deconvolution
     
-    import matplotlib.pyplot as plt
     
     Ttip = float(args.Ttip) # temperature of the tip
     Tsur = float(args.Tsur) # temperature of the tip

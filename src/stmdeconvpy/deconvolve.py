@@ -39,7 +39,7 @@ def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,crop=True,
     if ns is None:
 #        ns = [21,41,91,131]
         ni = 2*(n//2) +1 # odd number
-        ns = [41,ni] # compute twice
+        ns = [ni] #[41,ni] # compute twice
     if mode=="minimize":
       from .deconvmode import single_deconvolve_minimize as single_deconvolve
     elif mode=="algebra":
@@ -174,6 +174,12 @@ def dos2dIdV(x1,y1,x2,y2,**kwargs):
     """
     (x,y) = dos2I(x1,y1,x2,y2,**kwargs) # get the I VS V
     return I2dIdV(x,y) # return x and derivative
+
+
+def dIdV2dos(V_exp,dIdV_exp,V_tip,dos_tip,**kwargs):
+    """Compute the DOS from a dIdV"""
+    I_exp = dIdV2I(V_exp,dIdV_exp) # integrate the I
+    return deconvolve_I(V_exp,I_exp,V_tip,dos_tip,**kwargs)
 
 
 

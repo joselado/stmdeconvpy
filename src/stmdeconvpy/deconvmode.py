@@ -38,9 +38,15 @@ def single_deconvolve_algebra(x1,yexp,x2,ytip,n=200,sol=None,
       yout = lg.lstsq(MLO,yexpn,cond=cond)[0]
       yout[yout<0.] = 0. # set to zero
       error = np.mean(np.abs(yout-yexpn))
+      print("Error = ",error)
+      print("Cond = ",cond)
+      print("Entropy = ",entropy(yout))
       return error
-    cs = [1e-1,1e-2,1e-3,1e-4,1e-5] # try this errors
+    cs = [10,1.0,1e-1,1e-2,1e-3,1e-4,1e-5,1e-6,1e-7] # try this errors
+#    cs = 10**(-np.linspace(-1,7.,30))
+#    cs = 1./np.linspace(0.1,100,20)**3
     errs = [funerror(c) for c in cs] # different errors
+    print(np.round(errs,4))
 #    yout = integrate(xs,yout) # now integrate the signal
     error = min(errs) # error
     yout = lg.lstsq(MLO,yexpn,cond=cs[errs.index(min(errs))])[0]
@@ -97,4 +103,15 @@ def single_deconvolve_minimize(x1,yexp,x2,ytip,n=41,sol=None,
     yout = interpolate(xs,res.x,positive=True)(x1)
     if return_error:  return (x1,yout,f(res.x))
     else:  return (x1,yout)
+
+
+
+def entropy(y):
+    """Compute entropy of the distribution"""
+    y = y/np.sum(y) # normalize
+    y = y[y>1e-7] # positive ones
+    return -np.sum(y*np.log(y)) # return entropy
+
+
+
 

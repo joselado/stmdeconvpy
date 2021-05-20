@@ -11,24 +11,31 @@ import numpy as np
 from stmdeconvpy import deconvolve
 from stmdeconvpy import profiles
 
-xs = np.linspace(-2.0,2.0,200)
+xs = np.linspace(-4.0,4.0,1000)
 
 # define filtering signal
-yf = profiles.superconducting(delta=0.5)(xs)
+yf = profiles.dynes_superconductor(delta=0.5,gamma=0.1)(xs)
+yf2 = profiles.dynes_superconductor(delta=0.9,gamma=0.1)(xs)
+
+yf = yf + yf2
 
 # define the real signal
-y0 = profiles.random_peaks(nmax=6,xmin=-2.0,xmax=2.0,wmin=0.05,wmax=0.2)(xs)
+y0 = profiles.random_peaks(nmax=2,xmin=-2.0,xmax=2.0,wmin=0.05,wmax=0.2)(xs)
+y0 = y0/np.max(y0)
+print(y0.shape)
 
+# compute the dIdV associated to that DOS
+(xc,yc) = deconvolve.dos2dIdV(xs,y0,xs,yf)
 
-# define the convolved signal
-yc = deconvolve.fdconvolution(xs,y0,yf)
+yc = yc/np.max(yc)
 
 
 import matplotlib.pyplot as plt
 
-# deconvolve the signal
-xn,ydc = deconvolve.deconvolve(xs,yc,xs,yf)
+# deconvolve the signal, from dIdV 2 DOS
+xn,ydc = deconvolve.dIdV2dos(xs,yc,xs,yf,n=800,mode="algebra")
 
+ydc = ydc/np.max(ydc)
 
 # now plot the results
 import matplotlib
@@ -38,9 +45,13 @@ fig = plt.figure()
 fig.subplots_adjust(0.2,0.2)
 
 
-
+plt.subplot(121)
 plt.plot(xs,yf,label="Tip DOS",c="blue")
 plt.plot(xs,yc,label="Measured dI/dV (convolution)",c="green")
+plt.xlim([np.min(xs),np.max(xs)])
+plt.xlabel("Energy [a.u.]")
+plt.ylabel("dI/dV or DOS [a.u.]")
+plt.subplot(122)
 plt.plot(xs,y0,label="Surface DOS",c="red")
 plt.scatter(xn,ydc,label="Deconvolved surface DOS",c="red")
 plt.xlim([np.min(xs),np.max(xs)])
