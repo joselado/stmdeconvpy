@@ -5,13 +5,14 @@ from .profiles import interpolate,derivative,integrate
 
 def single_deconvolve_algebra(x1,yexp,x2,ytip,n=200,sol=None,
         return_error=True,print_error=True,
+        extend = 4.0, # time sto extend to avoid edge effects
         fd1=None,fd2=None,**kwargs):
     """
     Deconvolve a signal of the form y1(x)*y2(x-x')dx'
     """
     f1 = interpolate(x1,yexp) # interpolate
     f2 = interpolate(x2,ytip) # interpolate
-    xmax =  np.max(np.abs([np.max(x1),np.max(x2)]))
+    xmax =  np.max(np.abs([np.max(x1),np.max(x2)]))*extend
     xmin = -xmax # same
     # create the points centered at zero
     xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
@@ -36,19 +37,17 @@ def single_deconvolve_algebra(x1,yexp,x2,ytip,n=200,sol=None,
     yexpn = derivative(xs,yexpn) # derivative
     def funerror(cond):
       yout = lg.lstsq(MLO,yexpn,cond=cond)[0]
-      yout[yout<0.] = 0. # set to zero
       error = np.mean(np.abs(yout-yexpn))
-      print("Error = ",error)
-      print("Cond = ",cond)
-      print("Entropy = ",entropy(yout))
-      return error
-    cs = [10,1.0,1e-1,1e-2,1e-3,1e-4,1e-5,1e-6,1e-7] # try this errors
+#      print("Error = ",error)
+#      print("Cond = ",cond)
+#      print("Entropy = ",entropy(yout))
+      return error*entropy(yout)
+    cs = [10,1.0,1e-1,1e-2,1e-3,1e-4] # try this errors
 #    cs = 10**(-np.linspace(-1,7.,30))
 #    cs = 1./np.linspace(0.1,100,20)**3
     errs = [funerror(c) for c in cs] # different errors
-    print(np.round(errs,4))
 #    yout = integrate(xs,yout) # now integrate the signal
-    error = min(errs) # error
+    error = np.min(errs) # error
     yout = lg.lstsq(MLO,yexpn,cond=cs[errs.index(min(errs))])[0]
     yout = interpolate(xs,yout,positive=True)(x1)
     if return_error:  return (x1,yout,error)
@@ -103,6 +102,46 @@ def single_deconvolve_minimize(x1,yexp,x2,ytip,n=41,sol=None,
     yout = interpolate(xs,res.x,positive=True)(x1)
     if return_error:  return (x1,yout,f(res.x))
     else:  return (x1,yout)
+
+
+
+def single_deconvolve_minimize_jax(x1,yexp,x2,ytip,n=41,sol=None,
+        return_error=True,print_error=True,
+        fd1=None,fd2=None,**kwargs):
+    """
+    Deconvolve a signal of the form y1(x)*y2(x-x')dx'
+    """
+    from scipy.optimize import minimize
+    f1 = interpolate(x1,yexp)
+    f2 = interpolate(x2,ytip)
+#    xmin = np.min([np.min(x1),np.min(x2)])
+#    xmax = np.max([np.max(x1),np.max(x2)])
+    xmax =  np.max(np.abs([np.max(x1),np.max(x2)]))
+    xmin = -xmax # same
+    # create the points centered at zero
+    xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
+    yexpn = f1(xs) # interpolated data
+    ytipn = f2(xs) # interpolated data
+    if fd1 is not None: fd1x = fd1(xs) # evaluate the function
+    if fd2 is not None: fd2x = fd2(xs) # evaluate the function
+    else: fdx = None
+    from .fdconvolutionjax import get_fun_grad
+    fdiff,grad_fdiff = get_fun_grad(ytipn,fd1x,fd2x,yexpn) # get the function and the gradient
+    if sol is None: x0 = np.random.random(len(xs))
+    #derivative(xs,yexpn) # default try
+    else: x0 = interpolate(x1,sol)(xs)
+    res = minimize(fdiff,x0,jac=grad_fdiff)
+    yout = res.x*res.x # result
+    yout = interpolate(xs,yout,positive=True)(x1)
+    yout = yout/np.max(yout)
+    if return_error:  return (x1,yout,fdiff(res.x))
+    else:  return (x1,yout)
+
+
+
+
+
+
 
 
 

@@ -18,9 +18,10 @@ yf = profiles.dynes_superconductor(delta=0.5,gamma=0.1)(xs)
 yf2 = profiles.dynes_superconductor(delta=0.9,gamma=0.1)(xs)
 
 yf = yf + yf2
+yf = profiles.step_tip(delta=1.0,lowest=0.1,highest=1.0)(xs)
 
 # define the real signal
-y0 = profiles.random_peaks(nmax=4,xmin=-2.0,xmax=2.0,wmin=0.05,wmax=0.2)(xs)
+y0 = profiles.vortex_state(delta=0.3)(xs)
 y0 = y0/np.max(y0)
 
 # compute the dIdV associated to that DOS
@@ -32,7 +33,7 @@ yc = yc/np.max(yc)
 import matplotlib.pyplot as plt
 
 # deconvolve the signal, from dIdV 2 DOS
-xn,ydc = deconvolve.dIdV2dos(xs,yc,xs,yf,n=60,mode="minimize")
+xn,ydc = deconvolve.dIdV2dos(xs,yc,xs,yf,n=200,mode="algebra")
 
 ydc = ydc/np.max(ydc)
 

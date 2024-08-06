@@ -21,6 +21,28 @@ def constant():
     return f
 
 
+
+def step_tip(delta=0.2,highest=1.0,lowest=0.1):
+    def f(x):
+        out = np.zeros(len(x)) + highest
+        out[np.abs(x)<delta] = lowest
+        return out
+    return f
+
+
+
+def vortex_state(delta=0.2,peak=2.0,background=1.0):
+    """Profile for the state in a vortex"""
+    def f(x):
+        o = peak*(delta/(x**2+delta))
+        o = o + background*(np.tanh((np.abs(x)-3*delta)/delta) + 1.0)/2.
+        return o
+    return f
+
+
+
+
+
 def dynes_superconductor(delta=0.1,gamma=0.0):
     """Return the profile of a Dynes superconductor"""
     def f(x):

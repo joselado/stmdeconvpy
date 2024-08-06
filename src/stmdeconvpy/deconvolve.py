@@ -37,7 +37,6 @@ def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,crop=True,
         sol=None,sgfilter=True,n=200,mode="algebra",**kwargs):
     """Perform a deconvolution of a signal"""
     if ns is None:
-#        ns = [21,41,91,131]
         ni = 2*(n//2) +1 # odd number
         ns = [ni] #[41,ni] # compute twice
     if mode=="minimize":
@@ -175,8 +174,17 @@ def dos2dIdV(x1,y1,x2,y2,**kwargs):
     (x,y) = dos2I(x1,y1,x2,y2,**kwargs) # get the I VS V
     return I2dIdV(x,y) # return x and derivative
 
+def dIdV2dos(V_exp,dIdV_exp,V_tip,dos_tip,ntries_noise=1,**kwargs):
+    """Compute several times adding a little bit of noise"""
+    Vi = V_exp*(1. + 0.0*(np.random.random(len(V_exp))-0.5))
+    yout = 0.
+    for i in range(ntries_noise):
+        print("###########")
+        xi,yi = dIdV2dos_single(Vi,dIdV_exp,V_tip,dos_tip,**kwargs)
+        yout = yout + yi
+    return xi,yout
 
-def dIdV2dos(V_exp,dIdV_exp,V_tip,dos_tip,**kwargs):
+def dIdV2dos_single(V_exp,dIdV_exp,V_tip,dos_tip,**kwargs):
     """Compute the DOS from a dIdV"""
     I_exp = dIdV2I(V_exp,dIdV_exp) # integrate the I
     return deconvolve_I(V_exp,I_exp,V_tip,dos_tip,**kwargs)

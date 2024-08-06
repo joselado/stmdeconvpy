@@ -28,12 +28,12 @@ def fdconv_jit(y1,y2,yfd1,yfd2,out):
 
 
 
-@jit
+@jit(nopython=True)
 def conv(y1,y2):
     """Perform the convolution with the Fermi Dirac function"""
     n = len(y1) # number of points
     nc = (n-1)//2 # central site
-    out = [0.0 for i in range(n)]
+    out = np.zeros(n)
     for i in range(n):
       for j in range(-nc,2*n-nc):
           wp = j-i+nc # distance to zero frequency
@@ -54,19 +54,20 @@ def conv(y1,y2):
 def fdconvolution(x,y1,y2,fd1=None,fd2=None):
     """Fermi Dirac convolution"""
     if fd1 is None and fd2 is None: # no function given
-        return np.convolve(y1,y2,mode="same")/len(y1)
-        f1 = interpolate(x,y1) # interpolate
-        f2 = interpolate(x,y2) # interpolate
-        dx = max(x) - min(x)
-        xs = np.linspace(min(x)-dx,max(x)+dx,len(x)*20) # as many points
-        y3 = np.convolve(f1(xs),f2(xs),mode="same")
-        return interpolate(xs,y3)(x)
+        yout = np.convolve(y1,y2,mode="same")/len(y1)
+#        f1 = interpolate(x,y1) # interpolate
+#        f2 = interpolate(x,y2) # interpolate
+#        dx = max(x) - min(x)
+#        xs = np.linspace(min(x)-dx,max(x)+dx,len(x)*20) # as many points
+#        y3 = np.convolve(f1(xs),f2(xs),mode="same")
+#        return interpolate(xs,y3)(x)
     else: # assume that there is a Fermi Dirac distribution as input 
         if callable(fd1): fd1x = fd1(x) # call function
         else: fd1x = fd1 # assume it is an array
         if callable(fd2): fd2x = fd2(x) # call function
         else: fd2x = fd2 # assume it is an array
-        return fdconv(y1,y2,fd1x,fd2x)/len(x)
+        yout = fdconv(y1,y2,fd1x,fd2x)/len(x)
+    return yout
 
 
 
