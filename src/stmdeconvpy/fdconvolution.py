@@ -7,7 +7,7 @@ def fdconv(y1,y2,yfd1,yfd2):
     """Perform the convolution with the Fermi Dirac function"""
     n = len(y1) # number of points
     nc = (n-1)//2 # central site
-    out = np.array([0.0 for i in range(n)])
+    out = np.zeros(n) # initialize
     return fdconv_jit(y1,y2,yfd1,yfd2,out)
 
 @jit(nopython=True)
@@ -66,7 +66,12 @@ def fdconvolution(x,y1,y2,fd1=None,fd2=None):
         else: fd1x = fd1 # assume it is an array
         if callable(fd2): fd2x = fd2(x) # call function
         else: fd2x = fd2 # assume it is an array
-        yout = fdconv(y1,y2,fd1x,fd2x)/len(x)
+#        yout = fdconv(y1,y2,fd1x,fd2x)/len(x)
+        from .fdconvolutionjax import fdconv_jax
+        from .fdconvolutionjax import fdconv_python
+        yout = fdconv_jax(np.array(y1),np.array(y2),np.array(fd1x),np.array(fd2x))/len(x)
+#        yout2 = fdconv_python(np.array(y1),np.array(y2),np.array(fd1x),np.array(fd2x))/len(x)
+#        print(np.sum(np.abs(yout-yout2))) #; exit()
     return yout
 
 

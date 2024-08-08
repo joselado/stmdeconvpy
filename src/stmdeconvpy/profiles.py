@@ -95,8 +95,19 @@ def add_temperature(x,y,T=0.0):
 def derivative(x,y):
     """Compute a derivative"""
     f = interpolate(x,y) # interpolate
-    from scipy.misc import derivative as der
-    return der(f,x, dx=1e-2) # compute the derivative
+    from numba import jit
+    @jit(nopython=True)
+    def der(y,dx):
+        n = len(y)
+        yo = np.zeros(n) # output
+        for i in range(1,n-1):
+            yo[i] = (y[i+1] - y[i-1])
+        yo[0] = y[1] - y[0]
+        yo[n-1] = y[n-1] - y[n-2]
+        return yo/dx
+    return der(y,1e-3)
+#    from scipy.misc import derivative as der
+#    return der(f,x, dx=1e-2) # compute the derivative
 
 
 from scipy.interpolate import interp1d
@@ -224,6 +235,5 @@ def integrate(x,y):
 def integrate_array(x,y):
     """Integrate an array"""
     out = np.array([np.trapz(y[0:n],x[0:n]) for n in range(len(x))])
-#    out = normalize(out)
     return out # retunr array
 

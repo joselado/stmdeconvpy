@@ -56,9 +56,58 @@ def single_deconvolve_algebra(x1,yexp,x2,ytip,n=200,sol=None,
 
 
 
+#
+#def single_deconvolve_minimize(x1,yexp,x2,ytip,n=41,sol=None,
+#        return_error=True,print_error=True,
+#        fd1=None,fd2=None,**kwargs):
+#    """
+#    Deconvolve a signal of the form y1(x)*y2(x-x')dx'
+#    """
+#    from scipy.optimize import minimize
+#    f1 = interpolate(x1,yexp)
+#    f2 = interpolate(x2,ytip)
+##    xmin = np.min([np.min(x1),np.min(x2)])
+##    xmax = np.max([np.max(x1),np.max(x2)])
+#    xmax =  np.max(np.abs([np.max(x1),np.max(x2)]))
+#    xmin = -xmax # same
+#    # create the points centered at zero
+#    xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
+#    yexpn = f1(xs) # interpolated data
+#    ytipn = f2(xs) # interpolated data
+#    if fd1 is not None: fd1x = fd1(xs) # evaluate the function
+#    if fd2 is not None: fd2x = fd2(xs) # evaluate the function
+#    else: fdx = None
+#    def fdiff(y): # function with the difference
+#        out = fdconvolution(xs,y,ytipn,fd1=fd1x,fd2=fd2x) # special convolution
+#        diff = out - yexpn # difference
+##        print(np.max(np.abs(diff)))
+#        return diff
+#    def f(y):
+#        """Function to compute the error"""
+#        dd = fdiff(y)
+#        # compute the error
+#        error = np.abs(dd) #+ np.mean(np.abs(np.diff(dd))) 
+##        dmax = np.max(dd) # maximum error
+#        error = np.sqrt(np.mean(error**2)) # define error
+#        error = np.mean(np.abs(dd)) #+ np.mean(np.abs(np.diff(dd))) 
+##        if print_error: print(error)
+#        return error
+#    bounds = [(0,10) for ix in xs]
+#    if sol is None: x0 = np.random.random(len(xs))
+#    #derivative(xs,yexpn) # default try
+#    else: x0 = interpolate(x1,sol)(xs)
+#    res = minimize(f,x0,method="SLSQP",bounds=bounds,
+#            options={"ftol":1e-6,"maxiter":10000})
+##    res = minimize(f,res.x,method="Powell")
+#    yout = interpolate(xs,res.x,positive=True)(x1)
+#    if return_error:  return (x1,yout,f(res.x))
+#    else:  return (x1,yout)
+#
+
 
 def single_deconvolve_minimize(x1,yexp,x2,ytip,n=41,sol=None,
         return_error=True,print_error=True,
+        extend = 4.0,
         fd1=None,fd2=None,**kwargs):
     """
     Deconvolve a signal of the form y1(x)*y2(x-x')dx'
@@ -68,72 +117,35 @@ def single_deconvolve_minimize(x1,yexp,x2,ytip,n=41,sol=None,
     f2 = interpolate(x2,ytip)
 #    xmin = np.min([np.min(x1),np.min(x2)])
 #    xmax = np.max([np.max(x1),np.max(x2)])
-    xmax =  np.max(np.abs([np.max(x1),np.max(x2)]))
+    xmax0 =  np.max(np.abs([np.max(x1),np.max(x2)]))
+    # extend the range artificially
+    xmax =  xmax0
     xmin = -xmax # same
+    xmin0 = -xmax0 # same
     # create the points centered at zero
     xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
-    yexpn = f1(xs) # interpolated data
-    ytipn = f2(xs) # interpolated data
+    xs0 = xs
     if fd1 is not None: fd1x = fd1(xs) # evaluate the function
     if fd2 is not None: fd2x = fd2(xs) # evaluate the function
     else: fdx = None
-    def fdiff(y): # function with the difference
-        out = fdconvolution(xs,y,ytipn,fd1=fd1x,fd2=fd2x) # special convolution
-        diff = out - yexpn # difference
-#        print(np.max(np.abs(diff)))
-        return diff
-    def f(y):
-        """Function to compute the error"""
-        dd = fdiff(y)
-        # compute the error
-        error = np.abs(dd) #+ np.mean(np.abs(np.diff(dd))) 
-#        dmax = np.max(dd) # maximum error
-        error = np.sqrt(np.mean(error**2)) # define error
-        error = np.mean(np.abs(dd)) #+ np.mean(np.abs(np.diff(dd))) 
-        if print_error: print(error)
-        return error
-    bounds = [(0,10) for ix in xs]
-    if sol is None: x0 = np.random.random(len(xs))
-    #derivative(xs,yexpn) # default try
-    else: x0 = interpolate(x1,sol)(xs)
-    res = minimize(f,x0,method="SLSQP",bounds=bounds,
-            options={"ftol":1e-10,"maxiter":10000})
-#    res = minimize(f,res.x,method="Powell")
-    yout = interpolate(xs,res.x,positive=True)(x1)
-    if return_error:  return (x1,yout,f(res.x))
-    else:  return (x1,yout)
-
-
-
-def single_deconvolve_minimize_jax(x1,yexp,x2,ytip,n=41,sol=None,
-        return_error=True,print_error=True,
-        fd1=None,fd2=None,**kwargs):
-    """
-    Deconvolve a signal of the form y1(x)*y2(x-x')dx'
-    """
-    from scipy.optimize import minimize
-    f1 = interpolate(x1,yexp)
-    f2 = interpolate(x2,ytip)
-#    xmin = np.min([np.min(x1),np.min(x2)])
-#    xmax = np.max([np.max(x1),np.max(x2)])
-    xmax =  np.max(np.abs([np.max(x1),np.max(x2)]))
-    xmin = -xmax # same
-    # create the points centered at zero
-    xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
+    # get the interpolated DOS
     yexpn = f1(xs) # interpolated data
     ytipn = f2(xs) # interpolated data
-    if fd1 is not None: fd1x = fd1(xs) # evaluate the function
-    if fd2 is not None: fd2x = fd2(xs) # evaluate the function
-    else: fdx = None
+    yexpn = yexpn/np.max(yexpn) # normalize
+    ytipn = ytipn/np.max(ytipn) # normalize
+#    print(np.mean(yexpn),np.mean(ytipn))
+    ## now do the minimization
     from .fdconvolutionjax import get_fun_grad
-    fdiff,grad_fdiff = get_fun_grad(ytipn,fd1x,fd2x,yexpn) # get the function and the gradient
-    if sol is None: x0 = np.random.random(len(xs))
-    #derivative(xs,yexpn) # default try
-    else: x0 = interpolate(x1,sol)(xs)
-    res = minimize(fdiff,x0,jac=grad_fdiff)
+    # get the function, the gradient and the hessian
+    fdiff,grad_fdiff = get_fun_grad(ytipn,fd1x,fd2x,yexpn) 
+    x0 = np.random.random(len(xs))
+    res = minimize(fdiff,x0,jac=grad_fdiff,method="BFGS",
+            options={'gtol': 1e-9})
+#    res = minimize(fdiff,x0,jac=grad_fdiff,hessp=hess_fdiff,
+#            method='Newton-CG')
     yout = res.x*res.x # result
-    yout = interpolate(xs,yout,positive=True)(x1)
-    yout = yout/np.max(yout)
+    yout = interpolate(xs,yout)(x1)
+    yout = yout/np.mean(yout)
     if return_error:  return (x1,yout,fdiff(res.x))
     else:  return (x1,yout)
 

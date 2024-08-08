@@ -1,8 +1,11 @@
 import numpy as np
 from .profiles import normalize,derivative,interpolate
 from . import profiles
-from scipy.interpolate import interp1d
 from scipy.optimize import minimize,anderson
+
+distance_mode = "log"
+distance_mode = "linear"
+kinetic_quench = 1e-3
 
 
 def best_deconvolve(x1,yexp,x2,ytip,ntries=1,return_error=False,
@@ -14,6 +17,7 @@ def best_deconvolve(x1,yexp,x2,ytip,ntries=1,return_error=False,
     sols = [np.random.random(x1.shape) for i in range(ntries)]
     from . import parallel
     parallel.cores = min([parallel.maxcpu,ntries]) # number of cores
+    parallel.cores = 1
     # compute everything
     outs = parallel.pcall(f,sols)
     (x0,y0,e0) = outs[0] # do it once
@@ -34,7 +38,7 @@ def best_deconvolve(x1,yexp,x2,ytip,ntries=1,return_error=False,
 
 
 def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,crop=True,
-        sol=None,sgfilter=True,n=200,mode="algebra",**kwargs):
+        sol=None,sgfilter=False,n=200,mode="algebra",**kwargs):
     """Perform a deconvolution of a signal"""
     if ns is None:
         ni = 2*(n//2) +1 # odd number
@@ -47,8 +51,8 @@ def deconvolve(x1,yexp,x2,ytip,ns=None,return_error=False,crop=True,
     for ni in ns:
       (x,sol,error) = single_deconvolve(x1,yexp,x2,ytip,n=ni,sol=sol,
               return_error=True,**kwargs)
-    if crop: x,sol = profiles.discard_edge(x,sol,r=0.1)
-    if sgfilter: sol = smoothen(sol) # smoothen the solution
+#    if crop: x,sol = profiles.discard_edge(x,sol,r=0.1)
+#    if sgfilter: sol = smoothen(sol) # smoothen the solution
     print("Error in this minimization",error)
     if return_error: return x,sol,error
     else: return x,sol
@@ -134,12 +138,9 @@ def convolve_dos(x1,y1,x2,y2,n=None,Ttip=0.0,Tsur=0.0,T=None):
         fd2 = profiles.fermi_dirac(T=Tsur) # Fermi Dirac distribution
     f1 = interpolate(x1,y1)
     f2 = interpolate(x2,y2)
-    xmax =  np.min([np.max(x1),np.max(x2)])
-    xmin =  np.max([np.min(x1),np.min(x2)])
-#    xmin = np.min([np.min(x1),np.min(x2)])
-#    xmax = np.max([np.max(x1),np.max(x2)])
     if n is None: n = len(x1) # as many as x1
-    xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
+    xs = x1
+#    xs = np.linspace(xmin,xmax,n,endpoint=True) # as many points
     from .fdconvolution import fdconvolution
     yc = fdconvolution(xs,f1(xs),f2(xs),fd1=fd1(xs),fd2=fd2(xs))
     yo = interpolate(xs,yc)(x1)
@@ -171,18 +172,36 @@ def dos2dIdV(x1,y1,x2,y2,**kwargs):
     """
     Convert the two DOS into a dIdV VS V signal
     """
-    (x,y) = dos2I(x1,y1,x2,y2,**kwargs) # get the I VS V
-    return I2dIdV(x,y) # return x and derivative
+#    (x,y) = dos2I(x1,y1,x2,y2,**kwargs) # get the I VS V
+#    return I2dIdV(x,y) # return x and derivative
+#    # use a bigger range
+    xmax0,xmin0 = np.max(x1),np.min(x1) # max values
+    fac = 4
+    xmax = fac*xmax0
+    xmin = fac*xmin0
+    xnew = np.linspace(xmin,xmax,len(x1)*fac,endpoint=True) # new x axis
+    y1new = interpolate(x1,y1)(xnew) # in increased range
+    y2new = interpolate(x1,y2)(xnew) # in increased range
+#    xnew,y1new,y2new = x1,y1,y2
+    (x,y) = dos2I(xnew,y1new,xnew,y2new,**kwargs) # get the I VS V
+    (xo,yo) = I2dIdV(x,y) # return x and derivative
+    return x1,interpolate(xo,yo)(x1)
 
-def dIdV2dos(V_exp,dIdV_exp,V_tip,dos_tip,ntries_noise=1,**kwargs):
+def dIdV2dos(V_exp,dIdV_exp,V_tip,dos_tip,**kwargs):
     """Compute several times adding a little bit of noise"""
-    Vi = V_exp*(1. + 0.0*(np.random.random(len(V_exp))-0.5))
-    yout = 0.
-    for i in range(ntries_noise):
-        print("###########")
-        xi,yi = dIdV2dos_single(Vi,dIdV_exp,V_tip,dos_tip,**kwargs)
-        yout = yout + yi
-    return xi,yout
+#    print(np.mean(dIdV_exp),np.mean(dos_tip))
+    xmax0,xmin0 = np.max(V_exp),np.min(V_exp) # max values
+    fac = 2
+    xmax = fac*xmax0
+    xmin = fac*xmin0
+    xnew = np.linspace(xmin,xmax,len(V_exp)*fac,endpoint=True) # new x axis
+    dIdV_exp_new = interpolate(V_exp,dIdV_exp)(xnew) # in increased range
+    dos_tip_new = interpolate(V_tip,dos_tip)(xnew) # in increased range
+#    return dIdV2dos_single(V_exp,dIdV_exp,V_tip,dos_tip,**kwargs)
+    xo,yo = dIdV2dos_single(xnew,dIdV_exp_new,xnew,dos_tip_new,**kwargs)
+#    return V_exp,interpolate(xo,yo)(V_exp)
+    xo,yo = V_exp,interpolate(xo,yo)(V_exp)
+    return xo,yo/np.mean(yo)
 
 def dIdV2dos_single(V_exp,dIdV_exp,V_tip,dos_tip,**kwargs):
     """Compute the DOS from a dIdV"""
