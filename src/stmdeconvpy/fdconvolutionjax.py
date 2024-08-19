@@ -26,6 +26,7 @@ def fdconv_python(y1,y2,yfd1,yfd2):
 
 from jax import jit, vmap, lax
 import jax
+# use double precission
 #jax.config.update("jax_enable_x64", True)
 
 def fdconv_jax(y1, y2, yfd1, yfd2):
@@ -64,6 +65,14 @@ def kinetic1(y,w):
     return o
 
 
+# this is not used yet
+
+@jit
+def derivative(y):
+    return y[:-1] - y[1:]
+
+
+
 @jit
 def kinetic2(y,w):
     # Compute the central differences and sum them
@@ -91,6 +100,7 @@ def get_fun_grad(ytipn,fd1x,fd2x,yexpn,delta=1e-5,weight = None):
         k_w2 = np.zeros(n-2) # initialize
         k_w1[n//4:3*n//4] = 1.0 # only half of it
         k_w2[n//4:3*n//4] = 1.0 # only half of it
+#        k_w1,k_w2 = 1,1
         weight = 1.0
     from .deconvolve import distance_mode
     if distance_mode=="linear":
@@ -98,15 +108,19 @@ def get_fun_grad(ytipn,fd1x,fd2x,yexpn,delta=1e-5,weight = None):
     if distance_mode=="log":
         distance = log_distance # function to compute the distance
     from .deconvolve import kinetic_quench 
+    from .deconvolve import fit_mode   # this is not used yet
 
     @jit
     def fdiff(y): # function with the difference
         y = y*y # square of the signal
         out = fdconv_jax(y,ytipn,fd1x,fd2x) # special convolution
+#        out2 = derivative(out) # compute derivative
+#        yexpn2 = derivative(yexpn) # compute derivative
+#        diff = distance(out2,yexpn2) # compute distance vector
         diff = distance(out,yexpn) # compute distance vector
         diff = jnp.mean(weight*diff*diff) # distance
         # add the kinetic quench
-        diff = diff + kinetic_quench*kinetic1(y,k_w1) #+ kinetic2(y))
+#        diff = diff + kinetic_quench*kinetic1(y,k_w1) #+ kinetic2(y))
         diff = diff + kinetic_quench*kinetic2(y,k_w2) #+ kinetic2(y))
       #  diff = jnp.sqrt(diff)
         return diff

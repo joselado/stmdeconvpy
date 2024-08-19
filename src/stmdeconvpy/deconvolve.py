@@ -5,6 +5,7 @@ from scipy.optimize import minimize,anderson
 
 distance_mode = "log"
 distance_mode = "linear"
+fit_mode = "signal"
 kinetic_quench = 1e-3
 
 
@@ -98,7 +99,7 @@ def deconvolve_exact(x1,yexp,x2,ytip,fd1=None,fd2=None,
 def expand(x,y):
     n = len(x)
     dx = np.max(x) - np.min(x)
-    xi = np.linspace(np.min(x),np.max(x),len(x),endpoint=False)
+    xi = np.linspace(np.min(x),np.max(x),len(x),endpoint=True)
     xn = np.concatenate([xi-dx,x,xi+dx]) # new x axis
     yn = np.concatenate([np.zeros(n)+y[0],y,np.zeros(n)+y[n-1]])
     return xn,yn

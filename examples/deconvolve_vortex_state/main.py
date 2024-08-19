@@ -11,24 +11,26 @@ import numpy as np
 from stmdeconvpy import deconvolve
 from stmdeconvpy import profiles
 
+deconvolve.kinetic_quench = 1e-3
+
 xs = np.linspace(-4.0,4.0,1000)
 
 # define filtering signal
-yf = profiles.dynes_superconductor(delta=0.5,gamma=0.1)(xs)
+#yf = profiles.dynes_superconductor(delta=0.5,gamma=0.1)(xs)
 
 yf = profiles.step_tip(delta=1.0,lowest=0.1,highest=1.0)(xs)
+#yf += profiles.step_tip(delta=2.0,lowest=0.1,highest=1.0)(xs)
 yf = yf/np.mean(yf)
 
 
 # define the real signal
 y0 = profiles.vortex_state(delta=0.3)(xs)
 y0 = y0/np.mean(y0)
-#y0 +=  0.1*np.random.random(len(y0))
 
 # compute the dIdV associated to that DOS
 (xc,yc) = deconvolve.dos2dIdV(xs,y0,xs,yf)
-
 yc = yc/np.mean(yc)
+#yc += 0.1*(np.random.random(len(yc))-0.5)
 
 
 import matplotlib.pyplot as plt

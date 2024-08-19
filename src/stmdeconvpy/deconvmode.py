@@ -140,7 +140,7 @@ def single_deconvolve_minimize(x1,yexp,x2,ytip,n=41,sol=None,
     fdiff,grad_fdiff = get_fun_grad(ytipn,fd1x,fd2x,yexpn) 
     x0 = np.random.random(len(xs))
     res = minimize(fdiff,x0,jac=grad_fdiff,method="BFGS",
-            options={'gtol': 1e-9})
+            options={'gtol': 1e-10})
 #    res = minimize(fdiff,x0,jac=grad_fdiff,hessp=hess_fdiff,
 #            method='Newton-CG')
     yout = res.x*res.x # result

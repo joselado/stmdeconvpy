@@ -11,6 +11,9 @@ import numpy as np
 from stmdeconvpy import deconvolve
 from stmdeconvpy import profiles
 
+# signal has many peaks, allow more kinetic energy than usual
+deconvolve.kinetic_quench = 1e-3
+
 xs = np.linspace(-4.0,4.0,200)
 
 # define filtering signal
